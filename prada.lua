@@ -6,11 +6,8 @@ end
 
 if game.CoreGui:FindFirstChild("Plus") then
     return warn("Script already running")
-elseif game.GameId == 6331902150 or game.GameId == 7464167604 or workspace:GetAttribute("ServerType") then
-	Instance.new("BoolValue", game.CoreGui).Name = "Plus"
-else
-	return warn("Incorrect game")
 end
+Instance.new("BoolValue", game.CoreGui).Name = "Plus"
 
 game:GetService("Players").LocalPlayer.Idled:Connect(function()
 	game:GetService("VirtualUser"):ClickButton2(Vector2.new())
@@ -1703,7 +1700,7 @@ if game.GameId == 6331902150 then
             ColoredPrint("Days since game update: " .. DaysSinceGameUpdate,"info", Color3.fromRGB(236, 48, 120))
             FeatureLoadout["Outdated"] = {
                 ["TabAttributes"] = {
-                    ["DisplayTitle"] = '<font color="rgb(255,166,0)">⚠</font>' .. RichTextGradientColor(" SCRIPT ISN'T TESTED FOR THIS GAME VERSION ",{Color3.fromRGB(255, 166, 0), Color3.fromRGB(243, 227, 0)}) .. '<font color="rgb(243, 227, 0)">⚠</font>',
+                    ["DisplayTitle"] = '<font color="rgb(255,166,0)">âš </font>' .. RichTextGradientColor(" SCRIPT ISN'T TESTED FOR THIS GAME VERSION ",{Color3.fromRGB(255, 166, 0), Color3.fromRGB(243, 227, 0)}) .. '<font color="rgb(243, 227, 0)">âš </font>',
                     ["LayoutOrder"] = -2
                 }
             }
@@ -1723,7 +1720,7 @@ end
 if not (game.GameId == 6331902150 or game.GameId == 7464167604) then
     FeatureLoadout["Unofficial"] = {
           ["TabAttributes"] = {
-            ["DisplayTitle"] = '<font color="rgb(255,166,0)">⚠</font>' .. RichTextGradientColor(" SOME FEATURES MAY NOT WORK HERE ",{Color3.fromRGB(255, 166, 0), Color3.fromRGB(243, 227, 0)}) .. '<font color="rgb(243, 227, 0)">⚠</font>',
+            ["DisplayTitle"] = '<font color="rgb(255,166,0)">âš </font>' .. RichTextGradientColor(" SOME FEATURES MAY NOT WORK HERE ",{Color3.fromRGB(255, 166, 0), Color3.fromRGB(243, 227, 0)}) .. '<font color="rgb(243, 227, 0)">âš </font>',
             ["LayoutOrder"] = -1
         }
     }
@@ -1883,7 +1880,7 @@ local function ActionOnCharacter(Character)
                         CenterStaminaCounter.Visible = GetValue("StaminaPreset") ~= "Infinite" and CenterStaminaCounter:GetAttribute("WasVisible")
                     end
                     InfiniteStaminaElement.Name = "InfiniteAmount"
-                    InfiniteStaminaElement.Text = "∞"
+                    InfiniteStaminaElement.Text = "âˆž"
                     InfiniteStaminaElement.Parent = OriginalAmountUI.Parent
                     InfiniteStaminaElement.Visible = GetValue("StaminaPreset") == "Infinite"
                     InfiniteStaminaElement.Size = UDim2.new(0.225,0,0.7,14)
@@ -2466,111 +2463,116 @@ if NewUIVersion then
         MenuData = require(ReplicatedStorage.Systems.Player:FindFirstChild("SidebarHandler",true))
     end)
     if not suc or not MenuData or not Signal then
-        ColoredPrint("⚠ YOUR EXECUTOR DOES NOT SUPPORT THIS UI VERSION! ⚠\n Switch to a different executor or play a forsaken clone game that uses the V1 UI.\n The executor must fully support 'require' function for the script to work here", "error", Color3.new(1,0.4,0.25))
-        PlusButton.Visible = false
-        SidePlusButton.Visible = false
-        StarterGui:SetCore("DevConsoleVisible", true)
-        if MainUI:FindFirstChild("UpdateScreen") then
-            MainUI:FindFirstChild("UpdateScreen").Visible = false
+        ColoredPrint("⚠️ EXECUTOR KAMU TIDAK MENDUKUNG 'REQUIRE'. FALLBACK UI DIAKTIFKAN ⚠️", "warning", Color3.new(1,0.4,0.25))
+        -- Injeksi MenuData Buatan agar Script Tidak Crash
+        MenuData = { SidebarMenus = {}, Sidebars = {} }
+        function MenuData:CreateSidebarMenu(MenuName, MenuScreen)
+            local data = {Menu = MenuScreen, _sidebar = self}
+            self.SidebarMenus[MenuName] = data
+            return data
         end
-        return
-    end
-    MenuData.__index = MenuData
-    local UICreator = {}
-    UICreator.__index = UICreator
-    function UICreator.new(MenuName, MenuScreen)
-        local Metaverse = setmetatable({}, UICreator) -- roblox sigma metaverse when
-        Metaverse.Menu = MenuScreen:Clone()
-        Metaverse.Toggled = Signal.new()
-        Metaverse.Button = nil
-        Metaverse.MenuName = MenuName
-        Metaverse.Menu.Visible = false
-        Metaverse.Menu.Size = UDim2.fromScale()
-        Metaverse.Menu.Parent = MainUI
-        for i,v in Metaverse.Menu:QueryDescendants("ScrollingFrame") do
-            v:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
-                v.ScrollBarThickness = v.AbsoluteSize.X / 44
-            end)
-        end
-        return Metaverse
-    end
-    function UICreator.ToggleMenu(selfdata)
-        local DataSideBar = selfdata._sidebar
-        if DataSideBar.TogglingMenus then
-            return
-        elseif DataSideBar.MenusHidden and selfdata.SidebarButton then
-            return
-        elseif not (false and selfdata.Menu.Visible) then
-            DataSideBar.TogglingMenus = true
-            local VisibleUI = selfdata.Menu.Visible
-            PlaySound("select")
-            local SideBarMenu
-            for i, v in DataSideBar.SidebarMenus do
-                if v.Menu ~= selfdata.Menu or VisibleUI then
-                    if v.Menu ~= selfdata.Menu then
-                        if v.Menu.Visible then
-                            SideBarMenu = v
-                        end
-                    end
-                    if v.Menu.Visible then
-                        v.Toggled:Fire(false)
-                        local UIModule = ReplicatedStorage.Systems.Player.UI.Menus:FindFirstChild(v.MenuName)
-                        local success, result = pcall(require, UIModule)
-                        if success and (result and result.OnTransitionState) then
-                            result.OnTransitionState(false)
-                        else
-                            TweenService:Create(v.Menu, BaseTweenInfo, {
-                                ["Size"] = UDim2.new(1, -20, 0, 0)
-                            }):Play()
-                            task.delay(0.25, function()
-                                v.Menu.Visible = false
-                            end)
-                        end
-                        SetButtonState(false)
-                        if v.Button then
-                            v.Button:SetAppearanceState(false)
-                        end
-                    end
-                end
-            end
-            task.delay(0.3 + (SideBarMenu and 0.125 or 0), function()
-                DataSideBar.TogglingMenus = nil
-            end)
-            if SideBarMenu then
-                task.wait(0.125)
-                if DataSideBar.MenusHidden then
-                    DataSideBar.TogglingMenus = nil
-                    return
-                end
-            end
-            if not VisibleUI then
-                selfdata.Toggled:Fire(true)
-                local UIModule = ReplicatedStorage.Systems.Player.UI.Menus:FindFirstChild(selfdata.MenuName)
-                local success, result = pcall(require, UIModule)
-                if success and (result and result.OnTransitionState) then
-                    result.OnTransitionState(true)
-                else
-                    selfdata.Menu.Visible = true
-                    TweenService:Create(selfdata.Menu, BaseTweenInfo, {
-                        ["Size"] = UDim2.new(1, -20, 1, -20)
-                    }):Play()
-                end
-                SetButtonState(true)
-                if selfdata.Button then
-                    selfdata.Button:SetAppearanceState(true)
-                end
-            end
-        end
-    end
-    function MenuData.CreateSidebarMenu(self, MenuName, MenuScreen)
-        local Data = UICreator.new(MenuName, MenuScreen)
-        Data._sidebar = self
-        Data.SidebarButton = MenuData.Sidebar.Buttons:FindFirstChild(MenuName)
-        task.delay(0, function()
-            Data.Button = MenuData.SidebarButtons[MenuName]
+        -- Toggle Manual dari Tombol yang Muncul
+        SidePlusButton.Button.MouseButton1Click:Connect(function()
+            PlusMenu.Visible = not PlusMenu.Visible
         end)
-        MenuData.SidebarMenus[MenuName] = Data
-        return Data
+    else
+        MenuData.__index = MenuData
+        local UICreator = {}
+        UICreator.__index = UICreator
+        function UICreator.new(MenuName, MenuScreen)
+            local Metaverse = setmetatable({}, UICreator) -- roblox sigma metaverse when
+            Metaverse.Menu = MenuScreen:Clone()
+            Metaverse.Toggled = Signal.new()
+            Metaverse.Button = nil
+            Metaverse.MenuName = MenuName
+            Metaverse.Menu.Visible = false
+            Metaverse.Menu.Size = UDim2.fromScale()
+            Metaverse.Menu.Parent = MainUI
+            for i,v in Metaverse.Menu:QueryDescendants("ScrollingFrame") do
+                v:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+                    v.ScrollBarThickness = v.AbsoluteSize.X / 44
+                end)
+            end
+            return Metaverse
+        end
+        function UICreator.ToggleMenu(selfdata)
+            local DataSideBar = selfdata._sidebar
+            if DataSideBar.TogglingMenus then
+                return
+            elseif DataSideBar.MenusHidden and selfdata.SidebarButton then
+                return
+            elseif not (false and selfdata.Menu.Visible) then
+                DataSideBar.TogglingMenus = true
+                local VisibleUI = selfdata.Menu.Visible
+                PlaySound("select")
+                local SideBarMenu
+                for i, v in DataSideBar.SidebarMenus do
+                    if v.Menu ~= selfdata.Menu or VisibleUI then
+                        if v.Menu ~= selfdata.Menu then
+                            if v.Menu.Visible then
+                                SideBarMenu = v
+                            end
+                        end
+                        if v.Menu.Visible then
+                            v.Toggled:Fire(false)
+                            local UIModule = ReplicatedStorage.Systems.Player.UI.Menus:FindFirstChild(v.MenuName)
+                            local success, result = pcall(require, UIModule)
+                            if success and (result and result.OnTransitionState) then
+                                result.OnTransitionState(false)
+                            else
+                                TweenService:Create(v.Menu, BaseTweenInfo, {
+                                    ["Size"] = UDim2.new(1, -20, 0, 0)
+                                }):Play()
+                                task.delay(0.25, function()
+                                    v.Menu.Visible = false
+                                end)
+                            end
+                            SetButtonState(false)
+                            if v.Button then
+                                v.Button:SetAppearanceState(false)
+                            end
+                        end
+                    end
+                end
+                task.delay(0.3 + (SideBarMenu and 0.125 or 0), function()
+                    DataSideBar.TogglingMenus = nil
+                end)
+                if SideBarMenu then
+                    task.wait(0.125)
+                    if DataSideBar.MenusHidden then
+                        DataSideBar.TogglingMenus = nil
+                        return
+                    end
+                end
+                if not VisibleUI then
+                    selfdata.Toggled:Fire(true)
+                    local UIModule = ReplicatedStorage.Systems.Player.UI.Menus:FindFirstChild(selfdata.MenuName)
+                    local success, result = pcall(require, UIModule)
+                    if success and (result and result.OnTransitionState) then
+                        result.OnTransitionState(true)
+                    else
+                        selfdata.Menu.Visible = true
+                        TweenService:Create(selfdata.Menu, BaseTweenInfo, {
+                            ["Size"] = UDim2.new(1, -20, 1, -20)
+                        }):Play()
+                    end
+                    SetButtonState(true)
+                    if selfdata.Button then
+                        selfdata.Button:SetAppearanceState(true)
+                    end
+                end
+            end
+        end
+        function MenuData.CreateSidebarMenu(self, MenuName, MenuScreen)
+            local Data = UICreator.new(MenuName, MenuScreen)
+            Data._sidebar = self
+            Data.SidebarButton = MenuData.Sidebar.Buttons:FindFirstChild(MenuName)
+            task.delay(0, function()
+                Data.Button = MenuData.SidebarButtons[MenuName]
+            end)
+            MenuData.SidebarMenus[MenuName] = Data
+            return Data
+        end
     end
 else
     MenuData = {
@@ -2982,7 +2984,17 @@ function Initializer.Start()
     local SettingsData = {}
     SettingsData.PlayerSettings = {}
     Initializer.SettingsMenu = MenuData:CreateSidebarMenu("Plus", PlusMenu)
-    if NewUIVersion then
+    
+    -- Menerapkan setelan UI Custom bila Fallback UI aktif (require gagal)
+    if not MenuData.ToggleMenu then
+        PlusMenu.Position = UDim2.new(0.5, -225, 0.5, -175)
+        PlusMenu.Size = UDim2.new(0, 450, 0, 350)
+        PlusMenu.Active = true
+        PlusMenu.Draggable = true
+        PlusMenu.Visible = true
+    end
+
+    if NewUIVersion and MenuData.ToggleMenu then
         PlusMenu:Destroy()
         PlusMenu = Initializer.SettingsMenu.Menu
     end
@@ -3162,7 +3174,9 @@ if SidePlusButton:IsA("Frame") then
             local CountingMod = false
             if Menu then
                 SidePlusButton.Button.MouseButton1Click:Connect(function()
-                    MenuData.SidebarMenus["Plus"]["_sidebar"]["MenusHidden"] = false
+                    if MenuData.ToggleMenu then
+                        MenuData.SidebarMenus["Plus"]["_sidebar"]["MenusHidden"] = false
+                    end
                     if not PlusMenu.Visible then
                         for i,v in MainUI:GetChildren() do
                             if v ~= PlusMenu and (v.Name):find("Screen") or v.Name == "Shop" then
@@ -3201,7 +3215,7 @@ if SidePlusButton:IsA("Frame") then
                             end
                         end
                     end
-                    if MenuData.TogglingMenus == nil then
+                    if MenuData.TogglingMenus == nil and MenuData.ToggleMenu then
                         Menu:ToggleMenu()
                     end
                 end)
@@ -3304,8 +3318,10 @@ local function UICheck()
         if not NewUIVersion then
             Buttons.UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Top
         else
-            SideBar:FindFirstChildOfClass("UIPadding").PaddingRight = UDim.new(0.2,0)
-            SideBar:FindFirstChildOfClass("UIPadding").PaddingLeft = UDim.new(0,0)
+            if SideBar:FindFirstChildOfClass("UIPadding") then
+                SideBar:FindFirstChildOfClass("UIPadding").PaddingRight = UDim.new(0.2,0)
+                SideBar:FindFirstChildOfClass("UIPadding").PaddingLeft = UDim.new(0,0)
+            end
             UIScale.Scale = 1
         end
         PlusMenu.SettingsContainer.ImageTransparency = 0
@@ -3326,12 +3342,16 @@ local function UICheck()
         end
     else
         if NewUIVersion then
-            MenuData.SidebarMenus["Plus"]["_sidebar"]["MenusHidden"] = false
-            task.delay(0.5,function()
+            if MenuData.SidebarMenus["Plus"] and MenuData.SidebarMenus["Plus"]["_sidebar"] then
                 MenuData.SidebarMenus["Plus"]["_sidebar"]["MenusHidden"] = false
-            end)
-            SideBar:FindFirstChildOfClass("UIPadding").PaddingRight = UDim.new(0,0)
-            SideBar:FindFirstChildOfClass("UIPadding").PaddingLeft = UDim.new(0.2,0)
+                task.delay(0.5,function()
+                    MenuData.SidebarMenus["Plus"]["_sidebar"]["MenusHidden"] = false
+                end)
+            end
+            if SideBar:FindFirstChildOfClass("UIPadding") then
+                SideBar:FindFirstChildOfClass("UIPadding").PaddingRight = UDim.new(0,0)
+                SideBar:FindFirstChildOfClass("UIPadding").PaddingLeft = UDim.new(0.2,0)
+            end
             UIScale.Scale = 1.3
         end
         Buttons.UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
@@ -3381,4 +3401,4 @@ SideBar:SetAttribute("WasVisible",(MainUI:FindFirstChild("AbilityContainer") == 
 UICheck()
 SideBar.Visible = true
 
-ColoredPrint("Forsaken plus has loaded successfully","success",Color3.fromRGB(0, 200, 125))
+ColoredPrint("Forsaken plus has loaded successfully (Full Patch)","success",Color3.fromRGB(0, 200, 125))
