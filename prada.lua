@@ -1,5 +1,5 @@
 -- Pradaxca Plus Standalone UI --
--- FULL TEXTURE, LIQUID GLASS, DRAGGABLE, RESIZABLE, EN/ZH & FULL LOGIC EDITION --
+-- FULL TEXTURE, DRAGGABLE, RESIZABLE, EN/ZH & FULL LOGIC EDITION --
 
 if workspace.DistributedGameTime < 3 then
 	task.wait(3 - workspace.DistributedGameTime)
@@ -69,7 +69,7 @@ local Localization = {
     ["EN"] = {
         ["Settings"] = "Settings", ["Language"] = "Language", ["English"] = "English", ["Mandarin"] = "简体中文",
         ["Hacks"] = "Hacks", ["Automation"] = "Automation", ["Features"] = "Features", ["Visuals"] = "Visuals", ["Miscellaneous"] = "Misc", ["Information"] = "Information",
-        ["language_setting_title"] = "Language", ["hookmetamethod_title"] = "HookMetaMethod", ["getgc_title"] = "GetGC", ["require_title"] = "Require", ["files_title"] = "Files",
+        ["language_setting_title"] = "Language", ["hookmetamethod_title"] = "HookMetaMethod", ["getgc_title"] = "GetGC", ["require_title"] = "Require", ["files_title"] = "Files", ["Computer_title"] = "Computer",
         ["AutoGeneratorPuzzle_title"] = "Auto Generators", ["AutoPickup_title"] = "Auto Pickup Items",
         ["Invincible_title"] = "God Mode (Ghost)", ["DisableKillerWalls_title"] = "Disable Red Walls", ["DisableToxicTrails_title"] = "Disable Toxic Trails", ["DisableFootprints_title"] = "Disable Footprints", ["SmallerSpikeCollisions_title"] = "Smaller Spike Collisions", ["EnableJumping_title"] = "Enable Jumping", ["StaminaPreset_title"] = "Stamina Hack", ["AntiSlowness_title"] = "Anti Slowness", ["AnimationChanger_title"] = "Animation Changer", ["NoliControl_title"] = "Better Void Rush", ["ControllableDash_title"] = "Controllable Dash",
         ["DisableNoliNPC_title"] = "Disable Noli NPC", ["Disable007n7NPC_title"] = "Disable 007n7 NPC", ["ESP_title"] = "Master ESP", ["KillersESP_title"] = "Killers ESP", ["KillersColor_title"] = "Killers Color", ["SurvivorsESP_title"] = "Survivors ESP", ["SurvivorsColor_title"] = "Survivors Color", ["GeneratorsESP_title"] = "Generators ESP", ["GeneratorsColor_title"] = "Generators Color", ["GeneratorsCheck_title"] = "Hide Completed Generators", ["ItemsESP_title"] = "Items ESP", ["ItemsColor_title"] = "Items Color", ["ESPName_title"] = "Name ESP", ["ESPBox_title"] = "2D Box ESP", ["ESPTracer_title"] = "Tracer ESP",
@@ -79,7 +79,7 @@ local Localization = {
     ["ZH"] = {
         ["Settings"] = "设置", ["Language"] = "语言", ["English"] = "English", ["Mandarin"] = "简体中文",
         ["Hacks"] = "漏洞利用", ["Automation"] = "自动化", ["Features"] = "特点", ["Visuals"] = "透视", ["Miscellaneous"] = "其他", ["Information"] = "信息",
-        ["language_setting_title"] = "语言", ["hookmetamethod_title"] = "HookMetaMethod", ["getgc_title"] = "GetGC", ["require_title"] = "Require", ["files_title"] = "文件",
+        ["language_setting_title"] = "语言", ["hookmetamethod_title"] = "HookMetaMethod", ["getgc_title"] = "GetGC", ["require_title"] = "Require", ["files_title"] = "文件", ["Computer_title"] = "电脑模式",
         ["AutoGeneratorPuzzle_title"] = "自动发电机", ["AutoPickup_title"] = "自动拾取物品",
         ["Invincible_title"] = "无敌 (幽灵)", ["DisableKillerWalls_title"] = "禁用红墙", ["DisableToxicTrails_title"] = "禁用毒液轨迹", ["DisableFootprints_title"] = "禁用脚印", ["SmallerSpikeCollisions_title"] = "缩小尖刺碰撞", ["EnableJumping_title"] = "启用跳跃", ["StaminaPreset_title"] = "体力透支", ["AntiSlowness_title"] = "反减速", ["AnimationChanger_title"] = "动画修改器", ["NoliControl_title"] = "更好的虚空冲刺", ["ControllableDash_title"] = "可控冲刺",
         ["DisableNoliNPC_title"] = "禁用 Noli NPC", ["Disable007n7NPC_title"] = "禁用 007n7 NPC", ["ESP_title"] = "透视开关", ["KillersESP_title"] = "杀手透视", ["KillersColor_title"] = "杀手颜色", ["SurvivorsESP_title"] = "幸存者透视", ["SurvivorsColor_title"] = "幸存者颜色", ["GeneratorsESP_title"] = "发电机透视", ["GeneratorsColor_title"] = "发电机颜色", ["GeneratorsCheck_title"] = "隐藏已完成发电机", ["ItemsESP_title"] = "物品透视", ["ItemsColor_title"] = "物品颜色", ["ESPName_title"] = "名字透视", ["ESPBox_title"] = "2D 方框透视", ["ESPTracer_title"] = "射线透视",
@@ -91,7 +91,7 @@ local Localization = {
 local currentLang = "EN"
 local function getTranslation(key) return Localization[currentLang][key] or key end
 
--- Database FeatureLoadout (ALL DEFAULTS TO FALSE FOR SAFETY) --
+-- Database FeatureLoadout (SEMUA DEFAULT DIMATIKAN/FALSE SAAT STARTUP) --
 FeatureLoadout = {
     ["Settings"] = {
         ["TabAttributes"] = { ["LayoutOrder"] = 0 },
@@ -107,6 +107,7 @@ FeatureLoadout = {
         ["getgc"] = { ["DisplayDescription"] = "Required for GC exploits", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = true, ["ExtraData"] = { ["Requirement"] = true }, ["ScriptFunction"] = function(self, State) end },
         ["require"] = { ["DisplayDescription"] = "Required to read internal scripts", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = true, ["ExtraData"] = { ["Requirement"] = true }, ["ScriptFunction"] = function(self, State) end },
         ["files"] = { ["DisplayDescription"] = "Required for saving configs", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = true, ["ExtraData"] = { ["Requirement"] = true }, ["ScriptFunction"] = function(self, State) end },
+        ["Computer"] = { ["DisplayDescription"] = "Required for keyboard bypass", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = true, ["ExtraData"] = { ["Requirement"] = true }, ["ScriptFunction"] = function(self, State) end },
     },
     ["Automation"] = {
         ["TabAttributes"] = { ["LayoutOrder"] = 2 },
@@ -138,7 +139,7 @@ FeatureLoadout = {
                 local KillerDoorsFolder = GameMap and (GameMap:FindFirstChild("KillerDoors",true) or GameMap:FindFirstChild("Killer Doors",true))
                 local KillerCollisions = GameMap and GameMap:FindFirstChild("KillerOnly",true)
                 if KillerDoorsFolder then
-                    for i,v in KillerDoorsFolder:GetChildren() do
+                    for i,v in pairs(KillerDoorsFolder:GetChildren()) do
                         v.Color = Color
                         if v:GetAttribute("OriginalCanCollide") == nil then v:SetAttribute("OriginalCanCollide", v.CanCollide) end
                         v.CanCollide = v:GetAttribute("OriginalCanCollide") ~= false and not Value or false
@@ -148,21 +149,21 @@ FeatureLoadout = {
                             Params.CollisionGroup = "Killers"
                             Params.FilterDescendantsInstances = {KillerCollisions}
                             local Hitbox = workspace:GetPartBoundsInRadius(v.Position, 10, Params)
-                            for i,v in Hitbox do v.CanCollide = not Value end
+                            for i,h in pairs(Hitbox) do h.CanCollide = not Value end
                         end
                         if v:FindFirstChildOfClass("SpecialMesh") then v:FindFirstChildOfClass("SpecialMesh").VertexColor = VertexColor end
                     end
                 end
             end
         },
-        ["DisableToxicTrails"] = { ["DisplayDescription"] = "Disables damaging trails for John Doe", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) for i,v in InGame:GetChildren() do if v:IsA("Folder") and (v.Name):find("JohnDoeTrail") then for i,v2 in v:GetChildren() do if v2:IsA("BasePart") then v2.CanTouch = not Value end end end end end },
-        ["DisableFootprints"] = { ["DisplayDescription"] = "Disables footprints made by John Doe", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) for i,v in InGame:GetChildren() do if v:IsA("Folder") and (v.Name):find("Shadows") then for i,v2 in v:GetChildren() do if v2:IsA("BasePart") then v2.CanTouch = not Value end end if not v:GetAttribute("Checked") then v:SetAttribute("Checked", true) v.ChildAdded:Connect(function(GrandChild) if GrandChild:IsA("BasePart") then GrandChild.CanTouch = not FeatureLoadout["Features"]["DisableFootprints"]["Instance"].Value end end) end end end end },
-        ["SmallerSpikeCollisions"] = { ["DisplayDescription"] = "Makes spike collisions smaller", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) for i,v in InGame:GetChildren() do if v.Name == "SpikeCollision" then v.Size = Value and Vector3.new(10,3.25,3.25) or Vector3.new(11, 5, 5) v.Shape = Value and Enum.PartType.Cylinder or Enum.PartType.Block end end end },
+        ["DisableToxicTrails"] = { ["DisplayDescription"] = "Disables damaging trails for John Doe", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) for i,v in pairs(InGame:GetChildren()) do if v:IsA("Folder") and (v.Name):find("JohnDoeTrail") then for i,v2 in pairs(v:GetChildren()) do if v2:IsA("BasePart") then v2.CanTouch = not Value end end end end end },
+        ["DisableFootprints"] = { ["DisplayDescription"] = "Disables footprints made by John Doe", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) for i,v in pairs(InGame:GetChildren()) do if v:IsA("Folder") and (v.Name):find("Shadows") then for i,v2 in pairs(v:GetChildren()) do if v2:IsA("BasePart") then v2.CanTouch = not Value end end if not v:GetAttribute("Checked") then v:SetAttribute("Checked", true) v.ChildAdded:Connect(function(GrandChild) if GrandChild:IsA("BasePart") then GrandChild.CanTouch = not FeatureLoadout["Features"]["DisableFootprints"]["Instance"].Value end end) end end end end },
+        ["SmallerSpikeCollisions"] = { ["DisplayDescription"] = "Makes spike collisions smaller", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) for i,v in pairs(InGame:GetChildren()) do if v.Name == "SpikeCollision" then v.Size = Value and Vector3.new(10,3.25,3.25) or Vector3.new(11, 5, 5) v.Shape = Value and Enum.PartType.Cylinder or Enum.PartType.Block end end end },
         ["EnableJumping"] = { ["DisplayDescription"] = "Enables jumping when it's disabled", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["ScriptFunction"] = function(self, Value) HandleAllowJumping(Value) end },
         ["StaminaPreset"] = { ["DisplayDescription"] = "Modify your stamina limits", ["InstanceType"] = "StringValue", ["DefaultInstanceValue"] = "Original", ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "require", ["Options"] = "Original|Realistic|Semi-Realistic|Infinite" }, ["ScriptFunction"] = function(self, Value) end },
-        ["AntiSlowness"] = { ["DisplayDescription"] = "Removes slowness effects", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) if not Value or not SpeedMultipliers then return end for i,Child in SpeedMultipliers:GetChildren() do Check(Child) end end },
-        ["AnimationChanger"] = { ["DisplayDescription"] = "Override your animations", ["InstanceType"] = "StringValue", ["DefaultInstanceValue"] = "Original", ["ExtraData"] = { ["Requirement"] = "require", ["Options"] = "Original|Jason|Slasher|c00lkidd|John Doe|Noli|1x1x1x1|Nosferatu|Azure|!Herobrine|!Brimstone" }, ["ScriptFunction"] = function(self, Value) if Value == "Original" then BindableShouldStop:Fire() else local Animator = LocalHumanoid and LocalHumanoid:FindFirstChildOfClass("Animator") if ChangeTrackWithOverride then for i,v in Animator:GetPlayingAnimationTracks() do ChangeTrackWithOverride(v,Value,true) end end end end },
-        ["NoliControl"] = { ["DisplayDescription"] = "Better control of Void Rush", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "require" }, ["ScriptFunction"] = function(self, Value) if NoliConfig then for _, Entry in { {Name = "InitialTurnDuration", Value = 0.005, Default = 1.5}, {Name = "TurnSpeed", Value = 10000, Default = 1}, {Name = "InitialTurnMult", Value = 1000, Default = 6.6}, } do local Key, _, Parent = TableValueFind(NoliConfig, function(i, v) return type(i) == "string" and i:find(Entry.Name) and not i:find(Entry.Name .. "OG") end) if Key and Parent then if Value then Parent[Entry.Name .. "OG"] = Parent[Key] Parent[Key] = Entry.Value elseif Parent[Entry.Name .. "OG"] ~= nil then Parent[Key] = Parent[Entry.Name .. "OG"] or Entry.Default end end end if LocalCharacter and LocalCharacter.Parent.Name == "Killers" and not workspace:GetAttribute("NotifCD") then StarterGui:SetCore("SendNotification", { Title = "Information", Text = "Changes apply as killer", Duration = 5 }) workspace:SetAttribute("NotifCD", true) task.delay(10, function() workspace:SetAttribute("NotifCD", nil) end) end end end },
+        ["AntiSlowness"] = { ["DisplayDescription"] = "Removes slowness effects", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) if not Value or not SpeedMultipliers then return end for i,Child in pairs(SpeedMultipliers:GetChildren()) do Check(Child) end end },
+        ["AnimationChanger"] = { ["DisplayDescription"] = "Override your animations", ["InstanceType"] = "StringValue", ["DefaultInstanceValue"] = "Original", ["ExtraData"] = { ["Requirement"] = "require", ["Options"] = "Original|Jason|Slasher|c00lkidd|John Doe|Noli|1x1x1x1|Nosferatu|Azure|!Herobrine|!Brimstone" }, ["ScriptFunction"] = function(self, Value) if Value == "Original" then BindableShouldStop:Fire() else local Animator = LocalHumanoid and LocalHumanoid:FindFirstChildOfClass("Animator") if ChangeTrackWithOverride then for i,v in pairs(Animator:GetPlayingAnimationTracks()) do ChangeTrackWithOverride(v,Value,true) end end end end },
+        ["NoliControl"] = { ["DisplayDescription"] = "Better control of Void Rush", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "require" }, ["ScriptFunction"] = function(self, Value) if NoliConfig then for _, Entry in pairs({ {Name = "InitialTurnDuration", Value = 0.005, Default = 1.5}, {Name = "TurnSpeed", Value = 10000, Default = 1}, {Name = "InitialTurnMult", Value = 1000, Default = 6.6}, }) do local Key, _, Parent = TableValueFind(NoliConfig, function(i, v) return type(i) == "string" and i:find(Entry.Name) and not i:find(Entry.Name .. "OG") end) if Key and Parent then if Value then Parent[Entry.Name .. "OG"] = Parent[Key] Parent[Key] = Entry.Value elseif Parent[Entry.Name .. "OG"] ~= nil then Parent[Key] = Parent[Entry.Name .. "OG"] or Entry.Default end end end if LocalCharacter and LocalCharacter.Parent.Name == "Killers" and not workspace:GetAttribute("NotifCD") then StarterGui:SetCore("SendNotification", { Title = "Information", Text = "Changes apply as killer", Duration = 5 }) workspace:SetAttribute("NotifCD", true) task.delay(10, function() workspace:SetAttribute("NotifCD", nil) end) end end end },
         ["ControllableDash"] = { ["DisplayDescription"] = "Control where dash goes", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) end }
     },
     ["Visuals"] = {
@@ -179,7 +180,7 @@ FeatureLoadout = {
         ["SurvivorsColor"] = { ["DisplayDescription"] = "Color for Survivors", ["InstanceType"] = "StringValue", ["DefaultInstanceValue"] = "Green", ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP|SurvivorsESP", ["Options"] = "Green|Orange|Purple|Gold" }, ["ScriptFunction"] = function(self, Value) end },
         ["GeneratorsESP"] = { ["DisplayDescription"] = "Highlight Generators", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP" }, ["ScriptFunction"] = function(self, Value) end },
         ["GeneratorsColor"] = { ["DisplayDescription"] = "Color for Generators", ["InstanceType"] = "StringValue", ["DefaultInstanceValue"] = "Cyan", ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP|GeneratorsESP", ["Options"] = "Cyan|Blue|Green|Orange|Purple|Gold" }, ["ScriptFunction"] = function(self, Value) end },
-        ["GeneratorsCheck"] = { ["DisplayDescription"] = "Hide fully repaired generators", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP|GeneratorsESP" }, ["ScriptFunction"] = function(self, Value) end },
+        ["GeneratorsCheck"] = { ["DisplayDescription"] = "Hide fully repaired generators", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = true, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP|GeneratorsESP" }, ["ScriptFunction"] = function(self, Value) end },
         ["ItemsESP"] = { ["DisplayDescription"] = "Highlight Items", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP" }, ["ScriptFunction"] = function(self, Value) end },
         ["ItemsColor"] = { ["DisplayDescription"] = "Color for Items", ["InstanceType"] = "StringValue", ["DefaultInstanceValue"] = "Gold", ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP|ItemsESP", ["Options"] = "Gold|Cyan|Purple|White" }, ["ScriptFunction"] = function(self, Value) end },
     },
@@ -188,8 +189,8 @@ FeatureLoadout = {
         ["ExtendedFOV"] = { ["DisplayDescription"] = "Extends Field of View", ["InstanceType"] = "NumberValue", ["DefaultInstanceValue"] = PlayerData.Settings.Game.FieldOfView.Value, ["Savable"] = true, ["ExtraData"] = { ["MaxValue"] = 120, ["MinValue"] = 10, ["Step"] = 5 }, ["ScriptFunction"] = function(self, Value) PlayerData.Settings.Game.FieldOfView.Value = Value end },
         ["ExtendedZoom"] = { ["DisplayDescription"] = "Extends Maximum Zoom Distance", ["InstanceType"] = "NumberValue", ["DefaultInstanceValue"] = 10, ["Savable"] = true, ["ExtraData"] = { ["MaxValue"] = 100, ["MinValue"] = 0, ["Step"] = 5 }, ["ScriptFunction"] = function(self, Value) LocalPlayer.CameraMaxZoomDistance = game:GetService("StarterPlayer").CameraMaxZoomDistance + (Value * 0.25) end },
         ["ShowChat"] = { ["DisplayDescription"] = "Shows chat while in round", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = not game:GetService("Chat"):CanUserChatAsync(LocalPlayer.UserId) and true or nil }, ["ScriptFunction"] = function(self, Value) if TextChatService:FindFirstChildOfClass("ChatWindowConfiguration") then TextChatService:FindFirstChildOfClass("ChatWindowConfiguration").Enabled = Value end end },
-        ["ShowPrivacy"] = { ["DisplayDescription"] = "Reveal privacy info of others", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) for i,v in Players:GetPlayers() do if v ~= LocalPlayer then HandlePrivacySettings(v) end end end },
-        ["HideInjury"] = { ["DisplayDescription"] = "Hide low health red screen", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) for i,v in PlayerGui:FindFirstChild("TemporaryUI"):QueryDescendants("#redFlash,#injuredVignette") do v.Visible = not Value end if game:GetService("Lighting"):FindFirstChild("HealthDesaturation") then game:GetService("Lighting"):FindFirstChild("HealthDesaturation").Enabled = not Value end end },
+        ["ShowPrivacy"] = { ["DisplayDescription"] = "Reveal privacy info of others", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) for i,v in pairs(Players:GetPlayers()) do if v ~= LocalPlayer then HandlePrivacySettings(v) end end end },
+        ["HideInjury"] = { ["DisplayDescription"] = "Hide low health red screen", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = true, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) for i,v in pairs(PlayerGui:FindFirstChild("TemporaryUI"):QueryDescendants("#redFlash,#injuredVignette")) do v.Visible = not Value end if game:GetService("Lighting"):FindFirstChild("HealthDesaturation") then game:GetService("Lighting"):FindFirstChild("HealthDesaturation").Enabled = not Value end end },
         ["DeleteRagdolls"] = { ["DisplayDescription"] = "Delete dead bodies for FPS", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) if workspace:FindFirstChild("Ragdolls") and Value then workspace:FindFirstChild("Ragdolls"):ClearAllChildren() end end },
         ["CrashTarget"] = { ["DisplayDescription"] = "Crash target (Host Only)", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["ScriptFunction"] = function(self, Value) if Value then self.Instance.Value = false repeat Network:WaitForChild("RemoteEvent"):FireServer("ExecuteCommand", {"GiveStatus", "All", "Nausea", math.huge, 1}) task.wait(1.5) until false end end },
         ["SkyGlitch"] = { ["DisplayDescription"] = "Glitch sky (Host Only)", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["ScriptFunction"] = function(self, Value) if Value then self.Instance.Value = false Network:WaitForChild("RemoteEvent"):FireServer("ExecuteCommand", {"GiveStatus", "All", "Nausea", -1e11, 10}) end end },
@@ -199,7 +200,7 @@ FeatureLoadout = {
     ["Information"] = { ["TabAttributes"] = { ["LayoutOrder"] = 6 } }
 }
 
--- Database Init Sync Tanpa task.spawn Bug --
+-- Database Init Sync Tanpa Bug Kosong --
 PlusFolderSettings.Name = "Plus"
 PlusFolderSettings.Parent = PlayerData
 
@@ -230,7 +231,7 @@ for TabName, TabContents in pairs(FeatureLoadout) do
             local NewInstance = Instance.new(SettingData.InstanceType)
             NewInstance.Name = SettingName
             
-            -- AMAN: SEMUA OFF SECARA DEFAULT (Kecuali bagian Hacks/Backend)
+            -- AMAN: SEMUA FITUR CHEAT DEFAULT MATI
             local isSystem = (TabName == "Hacks" or TabName == "Settings")
             local defaultVal = SettingData.DefaultInstanceValue
             if not isSystem and SettingData.InstanceType == "BoolValue" then
@@ -640,14 +641,6 @@ function ChangeTrackWithOverride(Track,AnimationName,SkipOverride)
     end
 end
 
-local function DefaultData(Path, Option)
-	pcall(function()
-	    if isfile("PradaxcaScript/ForsakenPlus/" .. Path) == false then
-	        writefile("PradaxcaScript/ForsakenPlus/" .. Path, Option)
-	    end
-	end)
-end
-
 local ThreadManager = {Threads = {}}
 function ThreadManager:Start(Name,Function,Interval)
     if ThreadManager.Threads[Name] then return end
@@ -831,7 +824,7 @@ if InGame then
                         Params.CollisionGroup = "Killers"
                          Params.FilterDescendantsInstances = {KillerCollisions}
                         local Hitbox = workspace:GetPartBoundsInRadius(v.Position, 10, Params)
-                        for i,v in pairs(Hitbox) do v.CanCollide = not Value end
+                        for i,h in pairs(Hitbox) do h.CanCollide = not Value end
                     end
                     if v:FindFirstChildOfClass("SpecialMesh") then v:FindFirstChildOfClass("SpecialMesh").VertexColor = VertexColor end
                 end
@@ -951,7 +944,7 @@ if workspace:FindFirstChild("Ragdolls") then workspace:FindFirstChild("Ragdolls"
 
 
 -- ==========================================
--- SKRIP UI UTAMA: LIQUID GLASS, RESIZE & DRAG
+-- SKRIP UI UTAMA: FULL TEXTURE BG, RESIZE & DRAG
 -- ==========================================
 
 local SG = Instance.new("ScreenGui")
@@ -994,18 +987,18 @@ ToggleBtn.BackgroundTransparency = 1
 ToggleBtn.Image = "rbxassetid://114704837418228"
 MakeDraggable(ToggleBtn, ToggleBtn) -- Bisa diseret bebas
 
--- Frame Utama Kaca Cair --
+-- Frame Utama Kaca Cair Dihapus -> FULL BACKGROUND TEXTURE --
 local MainFrame = Instance.new("Frame", SG)
 MainFrame.Size = UDim2.new(0, 550, 0, 400)
 MainFrame.Position = UDim2.new(0.5, -275, 0.5, -200)
 MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-MainFrame.BackgroundTransparency = 0.5
+MainFrame.BackgroundTransparency = 0 -- FULL SOLID agar jelas
 MainFrame.BorderSizePixel = 0
 MainFrame.Visible = false
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 local MainStroke = Instance.new("UIStroke", MainFrame)
 MainStroke.Color = Color3.fromRGB(255, 105, 180)
-MainStroke.Thickness = 1
+MainStroke.Thickness = 2
 
 -- Latar Belakang Tekstur Penuh --
 local BGTexture = Instance.new("ImageLabel", MainFrame)
@@ -1013,29 +1006,25 @@ BGTexture.Size = UDim2.new(1, 0, 1, 0)
 BGTexture.Position = UDim2.new(0, 0, 0, 0)
 BGTexture.Image = "rbxassetid://92266968408887"
 BGTexture.BackgroundTransparency = 1
-BGTexture.ImageTransparency = 0.3 
-BGTexture.ZIndex = -1
+BGTexture.ImageTransparency = 0 -- 100% JELAS, TIDAK TRANSPARAN
+BGTexture.ZIndex = 0
 BGTexture.ScaleType = Enum.ScaleType.Crop
 Instance.new("UICorner", BGTexture).CornerRadius = UDim.new(0, 10)
-
--- Blur Effect --
-local blur = Instance.new("BlurEffect", Lighting)
-blur.Size = 0
-blur.Enabled = false
 
 -- Title Bar (Untuk Dragging Utama) --
 local TitleBar = Instance.new("Frame", MainFrame)
 TitleBar.Size = UDim2.new(1, 0, 0, 40)
 TitleBar.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
-TitleBar.BackgroundTransparency = 0.3
+TitleBar.BackgroundTransparency = 0.1
+TitleBar.ZIndex = 2
 Instance.new("UICorner", TitleBar).CornerRadius = UDim.new(0, 10)
 local FixSquare = Instance.new("Frame", TitleBar)
 FixSquare.Size = UDim2.new(1, 0, 0.5, 0)
 FixSquare.Position = UDim2.new(0, 0, 0.5, 0)
 FixSquare.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
-FixSquare.BackgroundTransparency = 0.3
+FixSquare.BackgroundTransparency = 0.1
 FixSquare.BorderSizePixel = 0
-FixSquare.ZIndex = 0
+FixSquare.ZIndex = 2
 
 MakeDraggable(TitleBar, MainFrame) -- Bisa ditarik dari Title Bar
 
@@ -1043,11 +1032,12 @@ local TitleText = Instance.new("TextLabel", TitleBar)
 TitleText.Size = UDim2.new(1, -50, 1, 0)
 TitleText.Position = UDim2.new(0, 15, 0, 0)
 TitleText.BackgroundTransparency = 1
-TitleText.Text = "Pradaxca Plus - Liquid Glass"
+TitleText.Text = "Pradaxca Plus - Pink Edition"
 TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
 TitleText.Font = Enum.Font.GothamBold
 TitleText.TextSize = 18
 TitleText.TextXAlignment = Enum.TextXAlignment.Left
+TitleText.ZIndex = 3
 
 -- Tombol Minimize --
 local MinBtn = Instance.new("TextButton", TitleBar)
@@ -1058,6 +1048,7 @@ MinBtn.Text = "-"
 MinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 MinBtn.Font = Enum.Font.GothamBold
 MinBtn.TextSize = 24
+MinBtn.ZIndex = 3
 
 -- Tombol Resize UI (Di pojok kanan bawah) --
 local ResizeBtn = Instance.new("TextButton", MainFrame)
@@ -1082,7 +1073,7 @@ end)
 UserInputService.InputChanged:Connect(function(input)
     if isResizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - resizeDragStart
-        local newX = math.clamp(resizeStartSize.X.Offset + delta.X, 350, 800) -- Batas min max lebar
+        local newX = math.clamp(resizeStartSize.X.Offset + delta.X, 400, 800) -- Batas min max lebar
         local newY = math.clamp(resizeStartSize.Y.Offset + delta.Y, 250, 600) -- Batas min max tinggi
         MainFrame.Size = UDim2.new(0, newX, 0, newY)
     end
@@ -1096,32 +1087,31 @@ end)
 local TabContainer = Instance.new("ScrollingFrame", MainFrame)
 TabContainer.Size = UDim2.new(0, 140, 1, -40)
 TabContainer.Position = UDim2.new(0, 0, 0, 40)
-TabContainer.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-TabContainer.BackgroundTransparency = 0.7
+TabContainer.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+TabContainer.BackgroundTransparency = 0.3 -- Biar texture kelihatan dikit, tapi jelas
 TabContainer.BorderSizePixel = 0
 TabContainer.ScrollBarThickness = 2
 TabContainer.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180)
+TabContainer.ZIndex = 2
 local TabListLayout = Instance.new("UIListLayout", TabContainer)
 
 local ContentContainer = Instance.new("Frame", MainFrame)
 ContentContainer.Size = UDim2.new(1, -140, 1, -40)
 ContentContainer.Position = UDim2.new(0, 140, 0, 40)
 ContentContainer.BackgroundTransparency = 1
+ContentContainer.ZIndex = 2
 
--- Animasi Buka/Tutup UI --
+-- Animasi Buka/Tutup UI TANPA BLUR --
 local function closeUI()
-    blur.Enabled = false
     TweenService:Create(MainFrame, TweenInfo.new(0.2), {Size = UDim2.new(0, MainFrame.Size.X.Offset, 0, 0)}):Play()
-    task.delay(0.2, function() MainFrame.Visible = false blur.Size = 0 end)
+    task.delay(0.2, function() MainFrame.Visible = false end)
 end
 
 local function openUI()
     MainFrame.Visible = true
     local targetY = math.max(MainFrame.Size.Y.Offset, 400)
     MainFrame.Size = UDim2.new(0, MainFrame.Size.X.Offset, 0, 0)
-    blur.Enabled = true
     TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, MainFrame.Size.X.Offset, 0, targetY)}):Play()
-    TweenService:Create(blur, TweenInfo.new(0.3), {Size = 10}):Play()
 end
 
 ToggleBtn.MouseButton1Click:Connect(function()
@@ -1149,6 +1139,7 @@ local function CreateTab(tabKey)
     TabBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
     TabBtn.Font = Enum.Font.GothamSemibold
     TabBtn.TextSize = 14
+    TabBtn.ZIndex = 3
 
     local Scroll = Instance.new("ScrollingFrame", ContentContainer)
     Scroll.Name = tabKey
@@ -1158,6 +1149,7 @@ local function CreateTab(tabKey)
     Scroll.ScrollBarThickness = 4
     Scroll.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180)
     Scroll.Visible = false
+    Scroll.ZIndex = 3
     local ScrollLayout = Instance.new("UIListLayout", Scroll)
     ScrollLayout.Padding = UDim.new(0, 5)
     ScrollLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
@@ -1214,8 +1206,9 @@ local function CreateToggle(parent, featureKey, valueObj, descText)
     Frame.Name = featureKey
     Frame.Size = UDim2.new(0.95, 0, 0, 45)
     Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    Frame.BackgroundTransparency = 0.4
+    Frame.BackgroundTransparency = 0.2 -- Sedikit transparan agar readable
     Frame:SetAttribute("LocalizationKey", featureKey)
+    Frame.ZIndex = 4
     Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 6)
     Instance.new("UIStroke", Frame).Color = Color3.fromRGB(80,80,80)
 
@@ -1229,17 +1222,19 @@ local function CreateToggle(parent, featureKey, valueObj, descText)
     Title.Font = Enum.Font.GothamBold
     Title.TextSize = 13
     Title.TextXAlignment = Enum.TextXAlignment.Left
+    Title.ZIndex = 5
 
     local Desc = Instance.new("TextLabel", Frame)
     Desc.Size = UDim2.new(0.7, 0, 0.5, 0)
     Desc.Position = UDim2.new(0, 10, 0.5, -2)
     Desc.BackgroundTransparency = 1
     Desc.Text = descText or ""
-    Desc.TextColor3 = Color3.fromRGB(150, 150, 150)
+    Desc.TextColor3 = Color3.fromRGB(180, 180, 180)
     Desc.Font = Enum.Font.Gotham
     Desc.TextSize = 10
     Desc.TextXAlignment = Enum.TextXAlignment.Left
     Desc.TextTruncate = Enum.TextTruncate.AtEnd
+    Desc.ZIndex = 5
 
     local Btn = Instance.new("TextButton", Frame)
     Btn.Size = UDim2.new(0, 50, 0, 24)
@@ -1249,6 +1244,7 @@ local function CreateToggle(parent, featureKey, valueObj, descText)
     Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     Btn.Font = Enum.Font.GothamBold
     Btn.TextSize = 12
+    Btn.ZIndex = 5
     Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 4)
 
     Btn.MouseButton1Click:Connect(function()
@@ -1270,8 +1266,9 @@ local function CreateCycle(parent, featureKey, valueObj, optionsString, descText
     Frame.Name = featureKey
     Frame.Size = UDim2.new(0.95, 0, 0, 45)
     Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    Frame.BackgroundTransparency = 0.4
+    Frame.BackgroundTransparency = 0.2
     Frame:SetAttribute("LocalizationKey", featureKey)
+    Frame.ZIndex = 4
     Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 6)
     Instance.new("UIStroke", Frame).Color = Color3.fromRGB(80,80,80)
 
@@ -1285,17 +1282,19 @@ local function CreateCycle(parent, featureKey, valueObj, optionsString, descText
     Title.Font = Enum.Font.GothamBold
     Title.TextSize = 13
     Title.TextXAlignment = Enum.TextXAlignment.Left
+    Title.ZIndex = 5
     
     local Desc = Instance.new("TextLabel", Frame)
     Desc.Size = UDim2.new(0.4, 0, 0.5, 0)
     Desc.Position = UDim2.new(0, 10, 0.5, -2)
     Desc.BackgroundTransparency = 1
     Desc.Text = descText or ""
-    Desc.TextColor3 = Color3.fromRGB(150, 150, 150)
+    Desc.TextColor3 = Color3.fromRGB(180, 180, 180)
     Desc.Font = Enum.Font.Gotham
     Desc.TextSize = 10
     Desc.TextXAlignment = Enum.TextXAlignment.Left
     Desc.TextTruncate = Enum.TextTruncate.AtEnd
+    Desc.ZIndex = 5
 
     local Btn = Instance.new("TextButton", Frame)
     Btn.Size = UDim2.new(0, 110, 0, 24)
@@ -1306,6 +1305,7 @@ local function CreateCycle(parent, featureKey, valueObj, optionsString, descText
     Btn.Font = Enum.Font.GothamBold
     Btn.TextSize = 11
     Btn.TextWrapped = true
+    Btn.ZIndex = 5
     Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 4)
 
     local function getOpts()
@@ -1336,8 +1336,9 @@ local function CreateSlider(parent, featureKey, valueObj, min, max, descText)
     Frame.Name = featureKey
     Frame.Size = UDim2.new(0.95, 0, 0, 55)
     Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    Frame.BackgroundTransparency = 0.4
+    Frame.BackgroundTransparency = 0.2
     Frame:SetAttribute("LocalizationKey", featureKey)
+    Frame.ZIndex = 4
     Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 6)
     Instance.new("UIStroke", Frame).Color = Color3.fromRGB(80,80,80)
 
@@ -1351,17 +1352,19 @@ local function CreateSlider(parent, featureKey, valueObj, min, max, descText)
     Title.Font = Enum.Font.GothamBold
     Title.TextSize = 13
     Title.TextXAlignment = Enum.TextXAlignment.Left
+    Title.ZIndex = 5
     
     local Desc = Instance.new("TextLabel", Frame)
     Desc.Size = UDim2.new(0.7, 0, 0.4, 0)
     Desc.Position = UDim2.new(0, 10, 0.4, 2)
     Desc.BackgroundTransparency = 1
     Desc.Text = descText or ""
-    Desc.TextColor3 = Color3.fromRGB(150, 150, 150)
+    Desc.TextColor3 = Color3.fromRGB(180, 180, 180)
     Desc.Font = Enum.Font.Gotham
     Desc.TextSize = 10
     Desc.TextXAlignment = Enum.TextXAlignment.Left
     Desc.TextTruncate = Enum.TextTruncate.AtEnd
+    Desc.ZIndex = 5
     
     local ValText = Instance.new("TextLabel", Frame)
     ValText.Size = UDim2.new(0.2, 0, 0.4, 0)
@@ -1372,6 +1375,7 @@ local function CreateSlider(parent, featureKey, valueObj, min, max, descText)
     ValText.Font = Enum.Font.GothamBold
     ValText.TextSize = 13
     ValText.TextXAlignment = Enum.TextXAlignment.Right
+    ValText.ZIndex = 5
 
     local SliderBar = Instance.new("TextButton", Frame)
     SliderBar.Size = UDim2.new(1, -20, 0, 8)
@@ -1379,6 +1383,7 @@ local function CreateSlider(parent, featureKey, valueObj, min, max, descText)
     SliderBar.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
     SliderBar.Text = ""
     SliderBar.AutoButtonColor = false
+    SliderBar.ZIndex = 5
     Instance.new("UICorner", SliderBar).CornerRadius = UDim.new(1, 0)
 
     local Fill = Instance.new("Frame", SliderBar)
@@ -1386,6 +1391,7 @@ local function CreateSlider(parent, featureKey, valueObj, min, max, descText)
     if range == 0 then range = 1 end
     Fill.Size = UDim2.new(math.clamp((valueObj.Value - min)/range, 0, 1), 0, 1, 0)
     Fill.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
+    Fill.ZIndex = 6
     Instance.new("UICorner", Fill).CornerRadius = UDim.new(1, 0)
 
     local isDragging = false
@@ -1459,7 +1465,8 @@ function updateInformationTab()
         local frame = Instance.new("Frame", infoScroll)
         frame.Size = UDim2.new(0.95, 0, 0, 35)
         frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-        frame.BackgroundTransparency = 0.4
+        frame.BackgroundTransparency = 0.2
+        frame.ZIndex = 4
         Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 6)
         Instance.new("UIStroke", frame).Color = Color3.fromRGB(80,80,80)
 
@@ -1472,6 +1479,7 @@ function updateInformationTab()
         label.Font = Enum.Font.GothamBold
         label.TextSize = 14
         label.TextXAlignment = Enum.TextXAlignment.Left
+        label.ZIndex = 5
     end
 
     createInfoText("dev_info", Color3.fromRGB(255, 105, 180))
@@ -1483,7 +1491,7 @@ function updateInformationTab()
 end
 
 function updateLocalization()
-    MainFrame.TitleBar.TitleText.Text = "Pradaxca Plus - Liquid Glass"
+    MainFrame.TitleBar.TitleText.Text = "Pradaxca Plus - Pink Edition"
     updateTabsLocalization()
     updateControlsLocalization()
     updateInformationTab()
@@ -1499,4 +1507,4 @@ task.spawn(function()
     StarterGui:SetCore("SendNotification", { Title = "Pradaxca Plus", Text = getTranslation("start_notif"), Duration = 5 })
 end)
 
-ColoredPrint("Pradaxca Plus - Full Logic Edition loaded successfully!","success",Color3.fromRGB(255, 105, 180))
+ColoredPrint("Pradaxca Plus - Full Active Edition loaded successfully!","success",Color3.fromRGB(255, 105, 180))
