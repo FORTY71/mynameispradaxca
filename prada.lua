@@ -1,12 +1,15 @@
 -- Shenxiue by pradaxca
--- Remastered interface & logicif workspace.DistributedGameTime < 3 then
+-- Remastered interface & logic
+if workspace.DistributedGameTime < 3 then
 	task.wait(3 - workspace.DistributedGameTime)
 end
 
-if game.CoreGui:FindFirstChild("PradaxcaUI") or game.CoreGui:FindFirstChild("shen") then
+local CoreGui = (gethui and gethui()) or game:GetService("CoreGui")
+
+if CoreGui:FindFirstChild("PradaxcaUI") or CoreGui:FindFirstChild("shen") then
     return warn("Script already running")
 elseif game.GameId == 6331902150 or game.GameId == 7464167604 or workspace:GetAttribute("ServerType") then
-	Instance.new("BoolValue", game.CoreGui).Name = "shen"
+	Instance.new("BoolValue", CoreGui).Name = "shen"
 else
 	return warn("Incorrect game")
 end
@@ -25,7 +28,6 @@ local LocalHumanoid = LocalCharacter and (LocalCharacter:FindFirstChildOfClass("
 local LocalHead = LocalCharacter and (LocalCharacter:FindFirstChild("Head") or LocalCharacter:WaitForChild("Head",2)) or nil
 local LocalRoot = LocalCharacter and ((LocalHumanoid and LocalHumanoid.RootPart) or LocalCharacter:FindFirstChild("HumanoidRootPart") or LocalCharacter:WaitForChild("HumanoidRootPart",2)) or nil
 local SpeedMultipliers = LocalCharacter and (LocalCharacter:FindFirstChild("SpeedMultipliers")) or nil
-local CoreGui = game:GetService("CoreGui")
 local PlayerGui = LocalPlayer:FindFirstChildOfClass("PlayerGui") or LocalPlayer:WaitForChild("PlayerGui", 60)
 local MainUI = PlayerGui:FindFirstChild("MainUI") or PlayerGui:WaitForChild("MainUI", 60)
 local PlayerData = LocalPlayer:FindFirstChild("PlayerData") or LocalPlayer:WaitForChild("PlayerData", 20)
@@ -145,7 +147,7 @@ FeatureLoadout = {
                         if not v:GetAttribute("Checked") then
                             v:SetAttribute("Checked", true)
                             v.ChildAdded:Connect(function(GrandChild)
- if GrandChild:IsA("BasePart") then GrandChild.CanTouch = not FeatureLoadout["Features"]["DisableFootprints"]["Instance"].Value end
+                                if GrandChild:IsA("BasePart") then GrandChild.CanTouch = not FeatureLoadout["Features"]["DisableFootprints"]["Instance"].Value end
                             end)
                         end
                     end
@@ -204,7 +206,7 @@ FeatureLoadout = {
                         local Key, _, Parent = TableValueFind(NoliConfig, function(i, v) return type(i) == "string" and i:find(Entry.Name) and not i:find(Entry.Name .. "OG") end)
                         if Key and Parent then
                             if Value then
- Parent[Entry.Name .. "OG"] = Parent[Key]
+                                Parent[Entry.Name .. "OG"] = Parent[Key]
                                 Parent[Key] = Entry.Value
                             elseif Parent[Entry.Name .. "OG"] ~= nil then
                                 Parent[Key] = Parent[Entry.Name .. "OG"] or Entry.Default
@@ -238,7 +240,7 @@ FeatureLoadout = {
         ["TabAttributes"] = {["DisplayTitle"] = "Miscellaneous",["LayoutOrder"] = 4},
         ["ExtendedFOV"] = {
             ["DisplayDescription"] = "A extended version of the FOV inside the normal settings",["DisplayTitle"] = "Extended FOV",["LayoutOrder"] = 1,["Savable"] = true,["InstanceType"] = "NumberValue",
-            ["DefaultInstanceValue"] = PlayerData and PlayerData:FindFirstChild("Settings") and PlayerData.Settings.Game.FieldOfView.Value or70,
+            ["DefaultInstanceValue"] = PlayerData and PlayerData:FindFirstChild("Settings") and PlayerData.Settings.Game.FieldOfView.Value or 70,
             ["ExtraData"] = {["MaxValue"] = 120,["MinValue"] = 10,["Step"] = 5,},
             ["ScriptFunction"] = function(self, Value)
                 if PlayerData and PlayerData:FindFirstChild("Settings") then PlayerData.Settings.Game.FieldOfView.Value = Value end
@@ -322,7 +324,7 @@ FeatureLoadout = {
                     if self.Instance then self.Instance.Value = Value end
                     task.delay(1.5, function() workspace:SetAttribute("InstaKill",nil) end)
                     if Value then
- repeat
+                        repeat
                             Network:WaitForChild("RemoteEvent"):FireServer("ExecuteCommand", {"GiveStatus", game.Players.LocalPlayer.Name, "Strength", 99999, 1})
                             task.wait(0.5)
                         until not self.Instance.Value
@@ -465,7 +467,7 @@ function HandlePrivacySettings(Player)
                         v:SetAttribute("OriginalValue", v.Value)
                         v:GetPropertyChangedSignal("Value"):Connect(function()
                             if FeatureLoadout["Miscellaneous"]["ShowPrivacy"]["Instance"] and FeatureLoadout["Miscellaneous"]["ShowPrivacy"]["Instance"].Value then v.Value = false
- else v.Value = v:GetAttribute("OriginalValue") end
+                            else v.Value = v:GetAttribute("OriginalValue") end
                         end)
                         if FeatureLoadout["Miscellaneous"]["ShowPrivacy"]["Instance"] and FeatureLoadout["Miscellaneous"]["ShowPrivacy"]["Instance"].Value then v.Value = false
                         else v.Value = v:GetAttribute("OriginalValue") end
@@ -745,7 +747,8 @@ local function CreateESP(character, color)
     set.Name.Center = true
     set.Name.Outline = true
     set.Name.Visible = false
-    set.Name.Color = color    ESPDrawings[character] = set
+    set.Name.Color = color    
+    ESPDrawings[character] = set
     return set
 end
 
@@ -931,7 +934,7 @@ local function ActionOnCharacter(Character)
                     if v.Name == "HinderedMovement" and GetValue("ControllableDash") and v.Value == 0 then v.Value = 0.005 end
                 end
                 local function UpdateVelocity()
- if GetValue("ControllableDash") then Child.LineDirection = LocalHumanoid.MoveDirection * OriginalVelocityMag
+                    if GetValue("ControllableDash") then Child.LineDirection = LocalHumanoid.MoveDirection * OriginalVelocityMag
                     else Child.LineDirection = OriginalVelocity end
                 end
                 UpdateVelocity()
@@ -968,12 +971,15 @@ if FeatureLoadout["ExploitFunctions"]["getgc"]["DefaultInstanceValue"] then
     task.spawn(function()
         if game.GameId ~= 6331902150 then
             task.wait(0.5)
-            for i,v in getgc(true) do
-                if type(v) == type({}) then
-                    if not rawget(v,"Run") then if i%250 == 0 then task.wait() end continue end
-                    local num = 0
-                    for i,v in v do num += 1 end
-                    if num > 3 then AllAnimations[HttpService:GenerateGUID(false):sub(1,5)] = v end
+            local success, gc_result = pcall(function() return getgc(true) end)
+            if success and type(gc_result) == type({}) then
+                for i,v in pairs(gc_result) do
+                    if type(v) == type({}) then
+                        if not rawget(v,"Run") then if i%250 == 0 then task.wait() end continue end
+                        local num = 0
+                        for i,v in pairs(v) do num += 1 end
+                        if num > 3 then AllAnimations[HttpService:GenerateGUID(false):sub(1,5)] = v end
+                    end
                 end
             end
         end    
@@ -1040,7 +1046,7 @@ else
                 end
                 return __namecall(self, ...)
             end))
- return __namecall
+            return __namecall
         end)
         if not HookSuccess or not HookResult then FeatureLoadout["ExploitFunctions"]["hookmetamethod"]["DefaultInstanceValue"] = false end
     end
@@ -1350,11 +1356,13 @@ local FeatureNames = {
     }
 }
 
-if CoreGui:FindFirstChild("PradaxcaUI") then CoreGui.PradaxcaUI:Destroy() end
+local UI_Parent = (gethui and gethui()) or game:GetService("CoreGui")
+
+if UI_Parent:FindFirstChild("PradaxcaUI") then UI_Parent.PradaxcaUI:Destroy() end
 
 local PradaxcaUI = Instance.new("ScreenGui")
 PradaxcaUI.Name = "PradaxcaUI"
-PradaxcaUI.Parent = CoreGui
+PradaxcaUI.Parent = UI_Parent
 PradaxcaUI.ResetOnSpawn = false
 
 -- Toggle Button
