@@ -1,5 +1,5 @@
 -- Pradaxca Plus Standalone UI --
--- FULL TEXTURE, LIQUID GLASS, EN/ZH & FULL LOGIC EDITION --
+-- FULL TEXTURE, LIQUID GLASS, DRAGGABLE, RESIZABLE, EN/ZH & FULL LOGIC EDITION --
 
 if workspace.DistributedGameTime < 3 then
 	task.wait(3 - workspace.DistributedGameTime)
@@ -29,7 +29,7 @@ game:GetService("Players").LocalPlayer.Idled:Connect(function()
 end)
 
 -- General Variables --
-local Version = "1.5"
+local Version = "1.6"
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local LocalCharacter = LocalPlayer.Character
@@ -64,7 +64,7 @@ CurrentGameVersion = Worked and CurrentGameVersion or GameVersionForScript
 local AllAnimations = {}
 local FeatureLoadout;
 
--- Localization (Kamus Bahasa) --
+-- Localization (Kamus Bahasa Lengkap) --
 local Localization = {
     ["EN"] = {
         ["Settings"] = "Settings", ["Language"] = "Language", ["English"] = "English", ["Mandarin"] = "简体中文",
@@ -91,32 +91,32 @@ local Localization = {
 local currentLang = "EN"
 local function getTranslation(key) return Localization[currentLang][key] or key end
 
--- Database FeatureLoadout Lengkap --
+-- Database FeatureLoadout (ALL DEFAULTS TO FALSE FOR SAFETY) --
 FeatureLoadout = {
     ["Settings"] = {
         ["TabAttributes"] = { ["LayoutOrder"] = 0 },
         ["Language"] = {
-            ["InstanceType"] = "StringValue", ["DefaultInstanceValue"] = "EN", ["Savable"] = true,
+            ["DisplayDescription"] = "Change UI Language", ["InstanceType"] = "StringValue", ["DefaultInstanceValue"] = "EN", ["Savable"] = true,
             ["ExtraData"] = { ["Options"] = "EN|ZH" },
             ["ScriptFunction"] = function(self, Value) currentLang = Value updateLocalization() end
         },
     },
     ["Hacks"] = {
         ["TabAttributes"] = { ["LayoutOrder"] = 1 },
-        ["hookmetamethod"] = { ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = true, ["ExtraData"] = { ["Requirement"] = true }, ["ScriptFunction"] = function(self, State) end },
-        ["getgc"] = { ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = true, ["ExtraData"] = { ["Requirement"] = true }, ["ScriptFunction"] = function(self, State) end },
-        ["require"] = { ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = true, ["ExtraData"] = { ["Requirement"] = true }, ["ScriptFunction"] = function(self, State) end },
-        ["files"] = { ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = true, ["ExtraData"] = { ["Requirement"] = true }, ["ScriptFunction"] = function(self, State) end },
+        ["hookmetamethod"] = { ["DisplayDescription"] = "Required for bypasses", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = true, ["ExtraData"] = { ["Requirement"] = true }, ["ScriptFunction"] = function(self, State) end },
+        ["getgc"] = { ["DisplayDescription"] = "Required for GC exploits", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = true, ["ExtraData"] = { ["Requirement"] = true }, ["ScriptFunction"] = function(self, State) end },
+        ["require"] = { ["DisplayDescription"] = "Required to read internal scripts", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = true, ["ExtraData"] = { ["Requirement"] = true }, ["ScriptFunction"] = function(self, State) end },
+        ["files"] = { ["DisplayDescription"] = "Required for saving configs", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = true, ["ExtraData"] = { ["Requirement"] = true }, ["ScriptFunction"] = function(self, State) end },
     },
     ["Automation"] = {
         ["TabAttributes"] = { ["LayoutOrder"] = 2 },
-        ["AutoGeneratorPuzzle"] = { ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) end },
-        ["AutoPickup"] = { ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) end },
+        ["AutoGeneratorPuzzle"] = { ["DisplayDescription"] = "Auto-completes generator puzzles", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) end },
+        ["AutoPickup"] = { ["DisplayDescription"] = "Automatically pick up items near you", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) end },
     },
     ["Features"] = {
         ["TabAttributes"] = { ["LayoutOrder"] = 3 },
         ["Invincible"] = {
-            ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["ExtraData"] = { ["Requirement"] = "hookmetamethod|require" },
+            ["DisplayDescription"] = "Makes you invisible & god mode", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["ExtraData"] = { ["Requirement"] = "hookmetamethod|require" },
             ["ScriptFunction"] = function(self, Value)
                  if workspace:GetAttribute("Invincible") == nil then
                     workspace:SetAttribute("Invincible", Value)
@@ -131,7 +131,7 @@ FeatureLoadout = {
             end
          },
         ["DisableKillerWalls"] = {
-            ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["ExtraData"] = { ["Requirement"] = true },
+            ["DisplayDescription"] = "Walk through killer red walls", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["ExtraData"] = { ["Requirement"] = true },
             ["ScriptFunction"] = function(self, Value)
                 local VertexColor = Value and Vector3.new(0,255,0) or Vector3.new(255,0,0)
                 local Color = Value and Color3.new(0,1,0) or Color3.new(1,0,0)
@@ -155,164 +155,111 @@ FeatureLoadout = {
                 end
             end
         },
-        ["DisableToxicTrails"] = {
-            ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true,
-            ["ScriptFunction"] = function(self, Value)
-                for i,v in InGame:GetChildren() do
-                    if v:IsA("Folder") and (v.Name):find("JohnDoeTrail") then
-                        for i,v2 in v:GetChildren() do if v2:IsA("BasePart") then v2.CanTouch = not Value end end
-                    end
-                end
-            end
-        },
-        ["DisableFootprints"] = {
-            ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true,
-            ["ScriptFunction"] = function(self, Value)
-                for i,v in InGame:GetChildren() do
-                     if v:IsA("Folder") and (v.Name):find("Shadows") then
-                        for i,v2 in v:GetChildren() do if v2:IsA("BasePart") then v2.CanTouch = not Value end end
-                        if not v:GetAttribute("Checked") then
-                             v:SetAttribute("Checked", true)
-                            v.ChildAdded:Connect(function(GrandChild) if GrandChild:IsA("BasePart") then GrandChild.CanTouch = not FeatureLoadout["Features"]["DisableFootprints"]["Instance"].Value end end)
-                        end
-                    end
-                end
-            end
-        },
-        ["SmallerSpikeCollisions"] = {
-            ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true,
-            ["ScriptFunction"] = function(self, Value)
-                 for i,v in InGame:GetChildren() do
-                    if v.Name == "SpikeCollision" then
-                        v.Size = Value and Vector3.new(10,3.25,3.25) or Vector3.new(11, 5, 5)
-                        v.Shape = Value and Enum.PartType.Cylinder or Enum.PartType.Block
-                    end
-                end
-            end
-        },
-        ["EnableJumping"] = { ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["ScriptFunction"] = function(self, Value) HandleAllowJumping(Value) end },
-        ["StaminaPreset"] = { ["InstanceType"] = "StringValue", ["DefaultInstanceValue"] = "Original", ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "require", ["Options"] = "Original|Realistic|Semi-Realistic|Infinite" }, ["ScriptFunction"] = function(self, Value) end },
-        ["AntiSlowness"] = { ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) if not Value or not SpeedMultipliers then return end for i,Child in SpeedMultipliers:GetChildren() do Check(Child) end end },
-        ["AnimationChanger"] = {
-            ["InstanceType"] = "StringValue", ["DefaultInstanceValue"] = "Original", ["ExtraData"] = { ["Requirement"] = "require", ["Options"] = "Original|Jason|Slasher|c00lkidd|John Doe|Noli|1x1x1x1|Nosferatu|Azure|!Herobrine|!Brimstone" },
-            ["ScriptFunction"] = function(self, Value)
-                if Value == "Original" then BindableShouldStop:Fire()
-                 else
-                    local Animator = LocalHumanoid and LocalHumanoid:FindFirstChildOfClass("Animator")
-                    if ChangeTrackWithOverride then for i,v in Animator:GetPlayingAnimationTracks() do ChangeTrackWithOverride(v,Value,true) end end
-                end
-            end
-         },
-        ["NoliControl"] = {
-            ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "require" },
-            ["ScriptFunction"] = function(self, Value)
-                if NoliConfig then
-                     for _, Entry in {
-                        {Name = "InitialTurnDuration", Value = 0.005, Default = 1.5}, {Name = "TurnSpeed", Value = 10000, Default = 1}, {Name = "InitialTurnMult", Value = 1000, Default = 6.6},
-                    } do
-                        local Key, _, Parent = TableValueFind(NoliConfig, function(i, v) return type(i) == "string" and i:find(Entry.Name) and not i:find(Entry.Name .. "OG") end)
-                        if Key and Parent then
-                            if Value then Parent[Entry.Name .. "OG"] = Parent[Key] Parent[Key] = Entry.Value
-                            elseif Parent[Entry.Name .. "OG"] ~= nil then Parent[Key] = Parent[Entry.Name .. "OG"] or Entry.Default end
-                        end
-                    end
-                    if LocalCharacter and LocalCharacter.Parent.Name == "Killers" and not workspace:GetAttribute("NotifCD") then
-                        StarterGui:SetCore("SendNotification", { Title = "Information", Text = "Changes only apply the time you become the killer", Duration = 5 })
-                        workspace:SetAttribute("NotifCD", true)
-                        task.delay(10, function() workspace:SetAttribute("NotifCD", nil) end)
-                    end
-                end
-            end
-        },
-        ["ControllableDash"] = { ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) end }
+        ["DisableToxicTrails"] = { ["DisplayDescription"] = "Disables damaging trails for John Doe", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) for i,v in InGame:GetChildren() do if v:IsA("Folder") and (v.Name):find("JohnDoeTrail") then for i,v2 in v:GetChildren() do if v2:IsA("BasePart") then v2.CanTouch = not Value end end end end end },
+        ["DisableFootprints"] = { ["DisplayDescription"] = "Disables footprints made by John Doe", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) for i,v in InGame:GetChildren() do if v:IsA("Folder") and (v.Name):find("Shadows") then for i,v2 in v:GetChildren() do if v2:IsA("BasePart") then v2.CanTouch = not Value end end if not v:GetAttribute("Checked") then v:SetAttribute("Checked", true) v.ChildAdded:Connect(function(GrandChild) if GrandChild:IsA("BasePart") then GrandChild.CanTouch = not FeatureLoadout["Features"]["DisableFootprints"]["Instance"].Value end end) end end end end },
+        ["SmallerSpikeCollisions"] = { ["DisplayDescription"] = "Makes spike collisions smaller", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) for i,v in InGame:GetChildren() do if v.Name == "SpikeCollision" then v.Size = Value and Vector3.new(10,3.25,3.25) or Vector3.new(11, 5, 5) v.Shape = Value and Enum.PartType.Cylinder or Enum.PartType.Block end end end },
+        ["EnableJumping"] = { ["DisplayDescription"] = "Enables jumping when it's disabled", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["ScriptFunction"] = function(self, Value) HandleAllowJumping(Value) end },
+        ["StaminaPreset"] = { ["DisplayDescription"] = "Modify your stamina limits", ["InstanceType"] = "StringValue", ["DefaultInstanceValue"] = "Original", ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "require", ["Options"] = "Original|Realistic|Semi-Realistic|Infinite" }, ["ScriptFunction"] = function(self, Value) end },
+        ["AntiSlowness"] = { ["DisplayDescription"] = "Removes slowness effects", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) if not Value or not SpeedMultipliers then return end for i,Child in SpeedMultipliers:GetChildren() do Check(Child) end end },
+        ["AnimationChanger"] = { ["DisplayDescription"] = "Override your animations", ["InstanceType"] = "StringValue", ["DefaultInstanceValue"] = "Original", ["ExtraData"] = { ["Requirement"] = "require", ["Options"] = "Original|Jason|Slasher|c00lkidd|John Doe|Noli|1x1x1x1|Nosferatu|Azure|!Herobrine|!Brimstone" }, ["ScriptFunction"] = function(self, Value) if Value == "Original" then BindableShouldStop:Fire() else local Animator = LocalHumanoid and LocalHumanoid:FindFirstChildOfClass("Animator") if ChangeTrackWithOverride then for i,v in Animator:GetPlayingAnimationTracks() do ChangeTrackWithOverride(v,Value,true) end end end end },
+        ["NoliControl"] = { ["DisplayDescription"] = "Better control of Void Rush", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "require" }, ["ScriptFunction"] = function(self, Value) if NoliConfig then for _, Entry in { {Name = "InitialTurnDuration", Value = 0.005, Default = 1.5}, {Name = "TurnSpeed", Value = 10000, Default = 1}, {Name = "InitialTurnMult", Value = 1000, Default = 6.6}, } do local Key, _, Parent = TableValueFind(NoliConfig, function(i, v) return type(i) == "string" and i:find(Entry.Name) and not i:find(Entry.Name .. "OG") end) if Key and Parent then if Value then Parent[Entry.Name .. "OG"] = Parent[Key] Parent[Key] = Entry.Value elseif Parent[Entry.Name .. "OG"] ~= nil then Parent[Key] = Parent[Entry.Name .. "OG"] or Entry.Default end end end if LocalCharacter and LocalCharacter.Parent.Name == "Killers" and not workspace:GetAttribute("NotifCD") then StarterGui:SetCore("SendNotification", { Title = "Information", Text = "Changes apply as killer", Duration = 5 }) workspace:SetAttribute("NotifCD", true) task.delay(10, function() workspace:SetAttribute("NotifCD", nil) end) end end end },
+        ["ControllableDash"] = { ["DisplayDescription"] = "Control where dash goes", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) end }
     },
     ["Visuals"] = {
         ["TabAttributes"] = { ["LayoutOrder"] = 4 },
-        ["ESP"] = { ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) end },
-        ["ESPName"] = { ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP" }, ["ScriptFunction"] = function(self, Value) end },
-        ["ESPBox"] = { ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP" }, ["ScriptFunction"] = function(self, Value) end },
-        ["ESPTracer"] = { ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP" }, ["ScriptFunction"] = function(self, Value) end },
-        ["DisableNoliNPC"] = { ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) HandleNoliNPC(Value) end },
-        ["Disable007n7NPC"] = { ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) Handle007n7NPC(Value) end },
-        ["KillersESP"] = { ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP" }, ["ScriptFunction"] = function(self, Value) end },
-        ["KillersColor"] = { ["InstanceType"] = "StringValue", ["DefaultInstanceValue"] = "Red", ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP|KillersESP", ["Options"] = "Red|Orange|Purple|Gold" }, ["ScriptFunction"] = function(self, Value) end },
-        ["SurvivorsESP"] = { ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP" }, ["ScriptFunction"] = function(self, Value) end },
-        ["SurvivorsColor"] = { ["InstanceType"] = "StringValue", ["DefaultInstanceValue"] = "Green", ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP|SurvivorsESP", ["Options"] = "Green|Orange|Purple|Gold" }, ["ScriptFunction"] = function(self, Value) end },
-        ["GeneratorsESP"] = { ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP" }, ["ScriptFunction"] = function(self, Value) end },
-        ["GeneratorsColor"] = { ["InstanceType"] = "StringValue", ["DefaultInstanceValue"] = "Cyan", ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP|GeneratorsESP", ["Options"] = "Cyan|Blue|Green|Orange|Purple|Gold" }, ["ScriptFunction"] = function(self, Value) end },
-        ["GeneratorsCheck"] = { ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = true, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP|GeneratorsESP" }, ["ScriptFunction"] = function(self, Value) end },
-        ["ItemsESP"] = { ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP" }, ["ScriptFunction"] = function(self, Value) end },
-        ["ItemsColor"] = { ["InstanceType"] = "StringValue", ["DefaultInstanceValue"] = "Gold", ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP|ItemsESP", ["Options"] = "Gold|Cyan|Purple|White" }, ["ScriptFunction"] = function(self, Value) end },
+        ["ESP"] = { ["DisplayDescription"] = "Master switch for ESP", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) end },
+        ["ESPName"] = { ["DisplayDescription"] = "Shows Player Names", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP" }, ["ScriptFunction"] = function(self, Value) end },
+        ["ESPBox"] = { ["DisplayDescription"] = "Shows 2D Box on Players", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP" }, ["ScriptFunction"] = function(self, Value) end },
+        ["ESPTracer"] = { ["DisplayDescription"] = "Draws line to Players", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP" }, ["ScriptFunction"] = function(self, Value) end },
+        ["DisableNoliNPC"] = { ["DisplayDescription"] = "Removes distracting Noli NPC", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) HandleNoliNPC(Value) end },
+        ["Disable007n7NPC"] = { ["DisplayDescription"] = "Removes distracting 007n7 NPC", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) Handle007n7NPC(Value) end },
+        ["KillersESP"] = { ["DisplayDescription"] = "Highlight Killers", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP" }, ["ScriptFunction"] = function(self, Value) end },
+        ["KillersColor"] = { ["DisplayDescription"] = "Color for Killers", ["InstanceType"] = "StringValue", ["DefaultInstanceValue"] = "Red", ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP|KillersESP", ["Options"] = "Red|Orange|Purple|Gold" }, ["ScriptFunction"] = function(self, Value) end },
+        ["SurvivorsESP"] = { ["DisplayDescription"] = "Highlight Survivors", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP" }, ["ScriptFunction"] = function(self, Value) end },
+        ["SurvivorsColor"] = { ["DisplayDescription"] = "Color for Survivors", ["InstanceType"] = "StringValue", ["DefaultInstanceValue"] = "Green", ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP|SurvivorsESP", ["Options"] = "Green|Orange|Purple|Gold" }, ["ScriptFunction"] = function(self, Value) end },
+        ["GeneratorsESP"] = { ["DisplayDescription"] = "Highlight Generators", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP" }, ["ScriptFunction"] = function(self, Value) end },
+        ["GeneratorsColor"] = { ["DisplayDescription"] = "Color for Generators", ["InstanceType"] = "StringValue", ["DefaultInstanceValue"] = "Cyan", ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP|GeneratorsESP", ["Options"] = "Cyan|Blue|Green|Orange|Purple|Gold" }, ["ScriptFunction"] = function(self, Value) end },
+        ["GeneratorsCheck"] = { ["DisplayDescription"] = "Hide fully repaired generators", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP|GeneratorsESP" }, ["ScriptFunction"] = function(self, Value) end },
+        ["ItemsESP"] = { ["DisplayDescription"] = "Highlight Items", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP" }, ["ScriptFunction"] = function(self, Value) end },
+        ["ItemsColor"] = { ["DisplayDescription"] = "Color for Items", ["InstanceType"] = "StringValue", ["DefaultInstanceValue"] = "Gold", ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP|ItemsESP", ["Options"] = "Gold|Cyan|Purple|White" }, ["ScriptFunction"] = function(self, Value) end },
     },
     ["Miscellaneous"] = {
          ["TabAttributes"] = { ["LayoutOrder"] = 5 },
-        ["ExtendedFOV"] = {
-            ["InstanceType"] = "NumberValue", ["DefaultInstanceValue"] = PlayerData.Settings.Game.FieldOfView.Value, ["Savable"] = true,
-            ["ExtraData"] = { ["MaxValue"] = 120, ["MinValue"] = 10, ["Step"] = 5 },
-            ["ScriptFunction"] = function(self, Value) PlayerData.Settings.Game.FieldOfView.Value = Value end
-        },
-        ["ExtendedZoom"] = {
-            ["InstanceType"] = "NumberValue", ["DefaultInstanceValue"] = 10, ["Savable"] = true,
-            ["ExtraData"] = { ["MaxValue"] = 100, ["MinValue"] = 0, ["Step"] = 5 },
-            ["ScriptFunction"] = function(self, Value) LocalPlayer.CameraMaxZoomDistance = game:GetService("StarterPlayer").CameraMaxZoomDistance + (Value * 0.25) end
-        },
-        ["ShowChat"] = {
-             ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true,
-            ["ExtraData"] = { ["Requirement"] = not game:GetService("Chat"):CanUserChatAsync(LocalPlayer.UserId) and true or nil },
-            ["ScriptFunction"] = function(self, Value)
-                 if TextChatService:FindFirstChildOfClass("ChatWindowConfiguration") then TextChatService:FindFirstChildOfClass("ChatWindowConfiguration").Enabled = Value end
-            end
-        },
-        ["ShowPrivacy"] = {
-            ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true,
-            ["ScriptFunction"] = function(self, Value) for i,v in Players:GetPlayers() do if v ~= LocalPlayer then HandlePrivacySettings(v) end end end
-        },
-        ["HideInjury"] = {
-             ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = true, ["Savable"] = true,
-            ["ScriptFunction"] = function(self, Value)
-                for i,v in PlayerGui:FindFirstChild("TemporaryUI"):QueryDescendants("#redFlash,#injuredVignette") do v.Visible = not Value end
-                if game:GetService("Lighting"):FindFirstChild("HealthDesaturation") then game:GetService("Lighting"):FindFirstChild("HealthDesaturation").Enabled = not Value end
-            end
-        },
-        ["DeleteRagdolls"] = {
-             ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true,
-            ["ScriptFunction"] = function(self, Value) if workspace:FindFirstChild("Ragdolls") and Value then workspace:FindFirstChild("Ragdolls"):ClearAllChildren() end end
-        },
-        ["CrashTarget"] = {
-            ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false,
-            ["ScriptFunction"] = function(self, Value)
-                if Value then
-                     self.Instance.Value = false
-                    repeat Network:WaitForChild("RemoteEvent"):FireServer("ExecuteCommand", {"GiveStatus", "All", "Nausea", math.huge, 1}) task.wait(1.5) until false
-                end
-            end
-        },
-        ["SkyGlitch"] = {
-            ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false,
-            ["ScriptFunction"] = function(self, Value) if Value then self.Instance.Value = false Network:WaitForChild("RemoteEvent"):FireServer("ExecuteCommand", {"GiveStatus", "All", "Nausea", -1e11, 10}) end end
-        },
-         ["InstantKill"] = {
-            ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false,
-            ["ScriptFunction"] = function(self, Value)
-                 if workspace:GetAttribute("InstaKill") == nil then
-                    workspace:SetAttribute("InstaKill", Value)
-                    self.Instance.Value = Value
-                    task.delay(1.5, function() workspace:SetAttribute("InstaKill",nil) end)
-                     if Value then repeat Network:WaitForChild("RemoteEvent"):FireServer("ExecuteCommand", {"GiveStatus", game.Players.LocalPlayer.Name, "Strength", 99999, 1}) task.wait(0.5) until not self.Instance.Value end
-                else self.Instance.Value = workspace:GetAttribute("InstaKill") end
-         end
-        },
-        ["Rejoin"] = {
-            ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false,
-            ["ScriptFunction"] = function(self, Value) if Value then pcall(function() game:GetService("TeleportService"):Teleport(game.PlaceId, LocalPlayer) end) end end
-        },
+        ["ExtendedFOV"] = { ["DisplayDescription"] = "Extends Field of View", ["InstanceType"] = "NumberValue", ["DefaultInstanceValue"] = PlayerData.Settings.Game.FieldOfView.Value, ["Savable"] = true, ["ExtraData"] = { ["MaxValue"] = 120, ["MinValue"] = 10, ["Step"] = 5 }, ["ScriptFunction"] = function(self, Value) PlayerData.Settings.Game.FieldOfView.Value = Value end },
+        ["ExtendedZoom"] = { ["DisplayDescription"] = "Extends Maximum Zoom Distance", ["InstanceType"] = "NumberValue", ["DefaultInstanceValue"] = 10, ["Savable"] = true, ["ExtraData"] = { ["MaxValue"] = 100, ["MinValue"] = 0, ["Step"] = 5 }, ["ScriptFunction"] = function(self, Value) LocalPlayer.CameraMaxZoomDistance = game:GetService("StarterPlayer").CameraMaxZoomDistance + (Value * 0.25) end },
+        ["ShowChat"] = { ["DisplayDescription"] = "Shows chat while in round", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = not game:GetService("Chat"):CanUserChatAsync(LocalPlayer.UserId) and true or nil }, ["ScriptFunction"] = function(self, Value) if TextChatService:FindFirstChildOfClass("ChatWindowConfiguration") then TextChatService:FindFirstChildOfClass("ChatWindowConfiguration").Enabled = Value end end },
+        ["ShowPrivacy"] = { ["DisplayDescription"] = "Reveal privacy info of others", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) for i,v in Players:GetPlayers() do if v ~= LocalPlayer then HandlePrivacySettings(v) end end end },
+        ["HideInjury"] = { ["DisplayDescription"] = "Hide low health red screen", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) for i,v in PlayerGui:FindFirstChild("TemporaryUI"):QueryDescendants("#redFlash,#injuredVignette") do v.Visible = not Value end if game:GetService("Lighting"):FindFirstChild("HealthDesaturation") then game:GetService("Lighting"):FindFirstChild("HealthDesaturation").Enabled = not Value end end },
+        ["DeleteRagdolls"] = { ["DisplayDescription"] = "Delete dead bodies for FPS", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) if workspace:FindFirstChild("Ragdolls") and Value then workspace:FindFirstChild("Ragdolls"):ClearAllChildren() end end },
+        ["CrashTarget"] = { ["DisplayDescription"] = "Crash target (Host Only)", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["ScriptFunction"] = function(self, Value) if Value then self.Instance.Value = false repeat Network:WaitForChild("RemoteEvent"):FireServer("ExecuteCommand", {"GiveStatus", "All", "Nausea", math.huge, 1}) task.wait(1.5) until false end end },
+        ["SkyGlitch"] = { ["DisplayDescription"] = "Glitch sky (Host Only)", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["ScriptFunction"] = function(self, Value) if Value then self.Instance.Value = false Network:WaitForChild("RemoteEvent"):FireServer("ExecuteCommand", {"GiveStatus", "All", "Nausea", -1e11, 10}) end end },
+         ["InstantKill"] = { ["DisplayDescription"] = "Instakill others (Host Only)", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["ScriptFunction"] = function(self, Value) if workspace:GetAttribute("InstaKill") == nil then workspace:SetAttribute("InstaKill", Value) self.Instance.Value = Value task.delay(1.5, function() workspace:SetAttribute("InstaKill",nil) end) if Value then repeat Network:WaitForChild("RemoteEvent"):FireServer("ExecuteCommand", {"GiveStatus", game.Players.LocalPlayer.Name, "Strength", 99999, 1}) task.wait(0.5) until not self.Instance.Value end else self.Instance.Value = workspace:GetAttribute("InstaKill") end end },
+        ["Rejoin"] = { ["DisplayDescription"] = "Rejoin the server", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["ScriptFunction"] = function(self, Value) if Value then pcall(function() game:GetService("TeleportService"):Teleport(game.PlaceId, LocalPlayer) end) end end },
     },
     ["Information"] = { ["TabAttributes"] = { ["LayoutOrder"] = 6 } }
 }
 
--- Database Init --
+-- Database Init Sync Tanpa task.spawn Bug --
 PlusFolderSettings.Name = "Plus"
 PlusFolderSettings.Parent = PlayerData
+
+local function ReturnData(Path, WithFolder)
+	if WithFolder == false then if isfile(Path) ~= false then return readfile(Path) end
+	else if isfile("PradaxcaScript/ForsakenPlus/" .. Path) ~= false then return readfile("PradaxcaScript/ForsakenPlus/" .. Path) end return nil end
+end
+
+local function ChangeData(Path, Option, WithFolder)
+	if WithFolder == false then if isfile(Path) ~= false then writefile(Path,Option) end
+	else if isfile("PradaxcaScript/ForsakenPlus/" .. Path) ~= false then writefile("PradaxcaScript/ForsakenPlus/" .. Path, Option) end end
+end
+
+local TableData = {}
+pcall(function()
+    local decoded = HttpService:JSONDecode(ReturnData("Data.txt", true))
+    if decoded and type(decoded) == "table" then TableData = decoded end
+end)
+
+for TabName, TabContents in pairs(FeatureLoadout) do
+    local Folder = Instance.new("Folder")
+    Folder.Name = TabName
+    Folder.Parent = PlusFolderSettings
+    if TabContents["TabAttributes"] then for Attribute, Value in pairs(TabContents["TabAttributes"]) do Folder:SetAttribute(Attribute, Value) end end
+    
+    for SettingName, SettingData in pairs(TabContents) do
+        if SettingName ~= "TabAttributes" then
+            local NewInstance = Instance.new(SettingData.InstanceType)
+            NewInstance.Name = SettingName
+            
+            -- AMAN: SEMUA OFF SECARA DEFAULT (Kecuali bagian Hacks/Backend)
+            local isSystem = (TabName == "Hacks" or TabName == "Settings")
+            local defaultVal = SettingData.DefaultInstanceValue
+            if not isSystem and SettingData.InstanceType == "BoolValue" then
+                defaultVal = false
+            end
+            
+            NewInstance.Value = defaultVal
+            
+            if SettingData["Savable"] and FeatureLoadout["Hacks"]["files"]["DefaultInstanceValue"] then
+                if TableData[SettingName] ~= nil and (not SettingData.ExtraData or SettingData.ExtraData.Requirement ~= true) then
+                    NewInstance.Value = TableData[SettingName]
+                end
+                NewInstance:GetPropertyChangedSignal("Value"):Connect(function()
+                    if NewInstance:GetAttribute("Requirement") == true then return end
+                    local TableData2 = {}
+                    pcall(function() TableData2 = HttpService:JSONDecode(ReturnData("Data.txt", true)) or {} end)
+                    TableData2[SettingName] = SettingData.DefaultInstanceValue ~= NewInstance.Value and NewInstance.Value or nil
+                    pcall(function() ChangeData("Data.txt", HttpService:JSONEncode(TableData2), true) end)
+                end)
+            end
+            NewInstance:SetAttribute("LayoutOrder", SettingData.LayoutOrder or 99)
+            NewInstance:SetAttribute("DisplayDescription", SettingData.DisplayDescription or "")
+            if SettingData.ExtraData then for ExtraDataIndex, ExtraDataValue in pairs(SettingData.ExtraData) do NewInstance:SetAttribute(ExtraDataIndex, ExtraDataValue) end end
+            
+            FeatureLoadout[TabName][SettingName]["Instance"] = NewInstance
+            NewInstance.Parent = Folder
+        end
+    end
+end
 
 function ColoredPrint(Text, Icon, Color)
     task.spawn(function()
@@ -327,7 +274,7 @@ function PlaySound(SoundName,Settings,KeepPlaying)
         task.spawn(function()
             Sound = Sound:Clone()
             Sound.Parent = workspace:FindFirstChild("Sounds") or workspace
-            if type(Settings) == "table" then for i,v in Settings do Sound[i] = v end end
+            if type(Settings) == "table" then for i,v in pairs(Settings) do Sound[i] = v end end
             if KeepPlaying then Sound.Playing = true else Sound:Play() end
             Debris:AddItem(Sound, Sound.TimeLength + 1)
             return Sound
@@ -342,7 +289,7 @@ function GetValue(FeatureName)
 end
 
 local function GetFunction(...)
-    for i,v in table.pack(...) do if v and typeof(v) == "function" then return v end end return nil
+    for i,v in pairs(table.pack(...)) do if v and typeof(v) == "function" then return v end end return nil
 end
 
 -- ESP LOGIC FUNCTIONS --
@@ -359,7 +306,7 @@ local function CheckDistance(Highlight, TargetRoot, Settings)
         else
             local Tween = TweenService:Create(Highlight, TweenInfo.new(0.1), {FillTransparency = 1, OutlineTransparency = 1})
             Tween.Parent = Highlight
-             Tween:Play()
+            Tween:Play()
             Debris:AddItem(Tween, 0.1)
         end
     end
@@ -423,7 +370,7 @@ local function UpdateCustomESP(Character, Enabled, Settings)
             text.Text = Character.Name
             text.Font = Enum.Font.GothamBold
             text.TextSize = 13
-             text.TextStrokeTransparency = 0.2
+            text.TextStrokeTransparency = 0.2
             text.Parent = nameESP
         end
         nameESP.TextLabel.TextColor3 = Settings.Color
@@ -460,7 +407,7 @@ local function UpdateCustomESP(Character, Enabled, Settings)
     if GetValue("ESPTracer") and localRoot then
         if not tracerESP then
             tracerESP = Instance.new("Beam")
-              tracerESP.Name = "TracerESP"
+            tracerESP.Name = "TracerESP"
             tracerESP.FaceCamera = true
             tracerESP.Width0 = 0.05
             tracerESP.Width1 = 0.05
@@ -486,7 +433,7 @@ function HandlePrivacySettings(Player)
         if pData then
            local PrivacySettings = pData:FindFirstChild("Privacy",true)
             if PrivacySettings then
-                for i,v in PrivacySettings:GetChildren() do
+                for i,v in pairs(PrivacySettings:GetChildren()) do
                     if not v:GetAttribute("OriginalValue") and v:IsA("BoolValue") then
                         v:SetAttribute("OriginalValue", v.Value)
                         v:GetPropertyChangedSignal("Value"):Connect(function()
@@ -527,20 +474,20 @@ end
 
 function HandleNoliNPC(Value)
     if Value then
-        for i,v in workspace.Players.Killers:GetChildren() do
+        for i,v in pairs(workspace.Players.Killers:GetChildren()) do
             if v.Name:lower() == "noli" and not Players:GetPlayerFromCharacter(v) then v.Parent = Lighting v:PivotTo(v:GetPivot() * CFrame.new(0,-100,0)) end
         end
         if workspace:FindFirstChild("Themes") then
             for i,v in pairs(workspace.Themes:GetChildren()) do if v.Name:find("FakeLayer") and v:IsA("Sound") then v:Destroy() end end
         end
     else
-        for i,v in Lighting:GetChildren() do if v.Name:lower() == "noli" then v.Parent = InGame v:PivotTo(v:GetPivot() * CFrame.new(0,100,0)) end end
+        for i,v in pairs(Lighting:GetChildren()) do if v.Name:lower() == "noli" then v.Parent = InGame v:PivotTo(v:GetPivot() * CFrame.new(0,100,0)) end end
     end
 end
 
 function Handle007n7NPC(Value)
     if Value then
-        for i,v in InGame:GetChildren() do
+        for i,v in pairs(InGame:GetChildren()) do
             if v.Name:lower() == "007n7" and not Players:GetPlayerFromCharacter(v) then
                 v.Parent = Lighting
                  if v:FindFirstChild("HumanoidRootPart") then
@@ -551,7 +498,7 @@ function Handle007n7NPC(Value)
             end
         end
     else
-        for i,v in Lighting:GetChildren() do if v.Name:lower() == "007n7" then v.Parent = InGame end end
+        for i,v in pairs(Lighting:GetChildren()) do if v.Name:lower() == "007n7" then v.Parent = InGame end end
     end
 end
 
@@ -621,7 +568,7 @@ function TableValueFind(Table, MatchFn, Seen)
     Seen = Seen or {}
     if Seen[Table] then return nil end
     Seen[Table] = true
-    for Key, Value in Table do
+    for Key, Value in pairs(Table) do
         if MatchFn(Key, Value) then return Key, Value, Table
         elseif type(Value) == "table" then
             local FoundKey, FoundValue, FoundParent = TableValueFind(Value, MatchFn, Seen)
@@ -694,18 +641,11 @@ function ChangeTrackWithOverride(Track,AnimationName,SkipOverride)
 end
 
 local function DefaultData(Path, Option)
-	if isfile("PradaxcaScript/ForsakenPlus/" .. Path) ~= false then return end
-	writefile("PradaxcaScript/ForsakenPlus/" .. Path, Option)
-end
-
-local function ChangeData(Path, Option, WithFolder)
-	if WithFolder == false then if isfile(Path) ~= false then writefile(Path,Option) end
-	else if isfile("PradaxcaScript/ForsakenPlus/" .. Path) ~= false then writefile("PradaxcaScript/ForsakenPlus/" .. Path, Option) end end
-end
-
-local function ReturnData(Path, WithFolder)
-	if WithFolder == false then if isfile(Path) ~= false then return readfile(Path) end
-	else if isfile("PradaxcaScript/ForsakenPlus/" .. Path) ~= false then return readfile("PradaxcaScript/ForsakenPlus/" .. Path) end return nil end
+	pcall(function()
+	    if isfile("PradaxcaScript/ForsakenPlus/" .. Path) == false then
+	        writefile("PradaxcaScript/ForsakenPlus/" .. Path, Option)
+	    end
+	end)
 end
 
 local ThreadManager = {Threads = {}}
@@ -729,11 +669,10 @@ local KillerAssets = ReplicatedStorage:FindFirstChild("Assets")
 local SurvivorAssets = KillerAssets and KillerAssets:FindFirstChild("Survivors")
 KillerAssets = KillerAssets and KillerAssets:FindFirstChild("Killers")
 
-local AnimationPreset = FeatureLoadout["Features"]["AnimationChanger"]
 if IsRequireSupported then
     local ConfigKiller = KillerAssets:QueryDescendants("ModuleScript#Config")
     local ConfigSurvivor = SurvivorAssets:QueryDescendants("ModuleScript#Config")
-    for i,ConfigModule in table.move(ConfigKiller, 1, #ConfigKiller, #ConfigSurvivor+1, ConfigSurvivor) do
+    for i,ConfigModule in pairs(table.move(ConfigKiller, 1, #ConfigKiller, #ConfigSurvivor+1, ConfigSurvivor)) do
         if ConfigModule.Parent:IsA("Model") then continue end
          local ConfigData = require(ConfigModule)
         local AnimationData = ConfigData and ConfigData.Animations
@@ -744,7 +683,6 @@ if IsRequireSupported then
         AllAnimations[ConfigModule.Parent.Name] = AnimationData
     end
 end
-if not NoliConfig then FeatureLoadout["Features"]["NoliControl"]["ExtraData"]["Requirement"] = true end
 
 local function ActionOnCharacter(Character)
     task.spawn(function()
@@ -826,34 +764,6 @@ if getgc then
         end
     end
 else FeatureLoadout["Hacks"]["getgc"]["DefaultInstanceValue"] = false end
-
-if FeatureLoadout["Hacks"]["getgc"]["DefaultInstanceValue"] then
-    task.spawn(function()
-        if game.GameId ~= 6331902150 then
-            task.wait(0.5)
-            for i,v in pairs(getgc(true)) do
-                 if type(v) == type({}) then
-                    if not rawget(v,"Run") then if i%250 == 0 then task.wait() end continue end
-                    local num = 0
-                    for _,_ in pairs(v) do num += 1 end
-                    if num > 3 then AllAnimations[HttpService:GenerateGUID(false):sub(1,5)] = v end
-                end
-            end
-        end    
-    end)
-end
-
-local readfile = GetFunction(readfile, read_file)
-local writefile = GetFunction(writefile, write_file)
-local isfolder = GetFunction(isfolder, is_folder)
-local isfile = GetFunction(isfile, is_file)
-local makefolder = GetFunction(makefolder, make_folder)
-if not (readfile and writefile and isfolder and isfile) then FeatureLoadout["Hacks"]["files"]["DefaultInstanceValue"] = false
-else
-    if not isfolder("PradaxcaScript") then makefolder("PradaxcaScript") end
-    if not isfolder("PradaxcaScript/ForsakenPlus") then makefolder("PradaxcaScript/ForsakenPlus") end
-    DefaultData("Data.txt", "{}")
-end
 
 local hookmetamethod = GetFunction(hookmetamethod, hook_metamethod)
 if not hookmetamethod then FeatureLoadout["Hacks"]["hookmetamethod"]["DefaultInstanceValue"] = false
@@ -1039,41 +949,9 @@ end
 
 if workspace:FindFirstChild("Ragdolls") then workspace:FindFirstChild("Ragdolls").ChildAdded:Connect(function(Ragdoll) if GetValue("DeleteRagdolls") then workspace:FindFirstChild("Ragdolls"):ClearAllChildren() end end) end
 
--- Database Init --
-PlusFolderSettings.Name = "Plus"
-PlusFolderSettings.Parent = PlayerData
-
-local TableData = HttpService:JSONDecode(ReturnData("Data.txt", true))
-for TabName, TabContents in pairs(FeatureLoadout) do
-    local Folder = Instance.new("Folder")
-    Folder.Name = TabName
-     Folder.Parent = PlusFolderSettings
-    if TabContents["TabAttributes"] then for Attribute, Value in pairs(TabContents["TabAttributes"]) do Folder:SetAttribute(Attribute, Value) end end
-    for SettingName, SettingData in pairs(TabContents) do
-        task.spawn(function()
-            if SettingName == "TabAttributes" then return end
-             local NewInstance = Instance.new(SettingData.InstanceType)
-            NewInstance.Name = SettingName
-            NewInstance.Value = SettingData.DefaultInstanceValue
-            if SettingData["Savable"] and FeatureLoadout["Hacks"]["files"]["DefaultInstanceValue"] then
-                if TableData[SettingName] ~= nil and NewInstance:GetAttribute("Requirement") ~= true then NewInstance.Value = TableData[SettingName] end
-                NewInstance:GetPropertyChangedSignal("Value"):Connect(function()
-                    if NewInstance:GetAttribute("Requirement") == true then return end
-                     local TableData2 = HttpService:JSONDecode(ReturnData("Data.txt", true))
-                    TableData2[SettingName] = SettingData.DefaultInstanceValue ~= NewInstance.Value and NewInstance.Value or nil
-                    ChangeData("Data.txt", HttpService:JSONEncode(TableData2), true)
-                end)
-            end
-            NewInstance:SetAttribute("LayoutOrder",SettingData.LayoutOrder or 99)
-            FeatureLoadout[TabName][SettingName]["Instance"] = NewInstance
-            if SettingData.ExtraData then for ExtraDataIndex, ExtraDataValue in pairs(SettingData.ExtraData) do NewInstance:SetAttribute(ExtraDataIndex, ExtraDataValue) end end
-            NewInstance.Parent = Folder
-        end)
-    end
-end
 
 -- ==========================================
--- SKRIP UI UTAMA: ESTETIKA KACA & ANIMASI
+-- SKRIP UI UTAMA: LIQUID GLASS, RESIZE & DRAG
 -- ==========================================
 
 local SG = Instance.new("ScreenGui")
@@ -1083,23 +961,47 @@ SG.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 local suc = pcall(function() SG.Parent = targetGui end)
 if not suc then SG.Parent = LocalPlayer:WaitForChild("PlayerGui") end
 
--- Tombol Toggle Transparan --
+-- Fungsi Dragging Kustom Untuk HP / Mobile Delta (Sangat Mulus)
+local function MakeDraggable(TopBar, Object)
+    local Dragging = false
+    local DragInput, DragStart, StartPosition
+    TopBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            Dragging = true
+            DragStart = input.Position
+            StartPosition = Object.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then Dragging = false end
+            end)
+        end
+    end)
+    TopBar.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then DragInput = input end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if input == DragInput and Dragging then
+            local delta = input.Position - DragStart
+            Object.Position = UDim2.new(StartPosition.X.Scale, StartPosition.X.Offset + delta.X, StartPosition.Y.Scale, StartPosition.Y.Offset + delta.Y)
+        end
+    end)
+end
+
+-- Tombol Toggle Transparan (Draggable) --
 local ToggleBtn = Instance.new("ImageButton", SG)
 ToggleBtn.Size = UDim2.new(0, 45, 0, 45)
 ToggleBtn.Position = UDim2.new(0, 15, 0.5, -25)
-ToggleBtn.BackgroundTransparency = 1 -- NO BACKGROUND
+ToggleBtn.BackgroundTransparency = 1 
 ToggleBtn.Image = "rbxassetid://114704837418228"
+MakeDraggable(ToggleBtn, ToggleBtn) -- Bisa diseret bebas
 
 -- Frame Utama Kaca Cair --
 local MainFrame = Instance.new("Frame", SG)
 MainFrame.Size = UDim2.new(0, 550, 0, 400)
 MainFrame.Position = UDim2.new(0.5, -275, 0.5, -200)
 MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-MainFrame.BackgroundTransparency = 0.5 -- Efek Liquid Glass
+MainFrame.BackgroundTransparency = 0.5
 MainFrame.BorderSizePixel = 0
 MainFrame.Visible = false
-MainFrame.Active = true
-MainFrame.Draggable = true
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 local MainStroke = Instance.new("UIStroke", MainFrame)
 MainStroke.Color = Color3.fromRGB(255, 105, 180)
@@ -1111,7 +1013,7 @@ BGTexture.Size = UDim2.new(1, 0, 1, 0)
 BGTexture.Position = UDim2.new(0, 0, 0, 0)
 BGTexture.Image = "rbxassetid://92266968408887"
 BGTexture.BackgroundTransparency = 1
-BGTexture.ImageTransparency = 0.3 -- blend with glass
+BGTexture.ImageTransparency = 0.3 
 BGTexture.ZIndex = -1
 BGTexture.ScaleType = Enum.ScaleType.Crop
 Instance.new("UICorner", BGTexture).CornerRadius = UDim.new(0, 10)
@@ -1121,7 +1023,7 @@ local blur = Instance.new("BlurEffect", Lighting)
 blur.Size = 0
 blur.Enabled = false
 
--- Title Bar --
+-- Title Bar (Untuk Dragging Utama) --
 local TitleBar = Instance.new("Frame", MainFrame)
 TitleBar.Size = UDim2.new(1, 0, 0, 40)
 TitleBar.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
@@ -1135,8 +1037,10 @@ FixSquare.BackgroundTransparency = 0.3
 FixSquare.BorderSizePixel = 0
 FixSquare.ZIndex = 0
 
+MakeDraggable(TitleBar, MainFrame) -- Bisa ditarik dari Title Bar
+
 local TitleText = Instance.new("TextLabel", TitleBar)
-TitleText.Size = UDim2.new(1, -15, 1, 0)
+TitleText.Size = UDim2.new(1, -50, 1, 0)
 TitleText.Position = UDim2.new(0, 15, 0, 0)
 TitleText.BackgroundTransparency = 1
 TitleText.Text = "Pradaxca Plus - Liquid Glass"
@@ -1145,9 +1049,52 @@ TitleText.Font = Enum.Font.GothamBold
 TitleText.TextSize = 18
 TitleText.TextXAlignment = Enum.TextXAlignment.Left
 
--- Container Tab --
+-- Tombol Minimize --
+local MinBtn = Instance.new("TextButton", TitleBar)
+MinBtn.Size = UDim2.new(0, 30, 0, 30)
+MinBtn.Position = UDim2.new(1, -35, 0, 5)
+MinBtn.BackgroundTransparency = 1
+MinBtn.Text = "-"
+MinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+MinBtn.Font = Enum.Font.GothamBold
+MinBtn.TextSize = 24
+
+-- Tombol Resize UI (Di pojok kanan bawah) --
+local ResizeBtn = Instance.new("TextButton", MainFrame)
+ResizeBtn.Size = UDim2.new(0, 20, 0, 20)
+ResizeBtn.Position = UDim2.new(1, -20, 1, -20)
+ResizeBtn.BackgroundTransparency = 1
+ResizeBtn.Text = "◢"
+ResizeBtn.TextColor3 = Color3.fromRGB(255, 105, 180)
+ResizeBtn.Font = Enum.Font.GothamBold
+ResizeBtn.TextSize = 18
+ResizeBtn.ZIndex = 10
+
+local isResizing = false
+local resizeDragStart, resizeStartSize
+ResizeBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        isResizing = true
+        resizeDragStart = input.Position
+        resizeStartSize = MainFrame.Size
+    end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if isResizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - resizeDragStart
+        local newX = math.clamp(resizeStartSize.X.Offset + delta.X, 350, 800) -- Batas min max lebar
+        local newY = math.clamp(resizeStartSize.Y.Offset + delta.Y, 250, 600) -- Batas min max tinggi
+        MainFrame.Size = UDim2.new(0, newX, 0, newY)
+    end
+end)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then isResizing = false end
+end)
+
+
+-- Container Tab & Konten --
 local TabContainer = Instance.new("ScrollingFrame", MainFrame)
-TabContainer.Size = UDim2.new(0, 150, 1, -40)
+TabContainer.Size = UDim2.new(0, 140, 1, -40)
 TabContainer.Position = UDim2.new(0, 0, 0, 40)
 TabContainer.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 TabContainer.BackgroundTransparency = 0.7
@@ -1156,27 +1103,31 @@ TabContainer.ScrollBarThickness = 2
 TabContainer.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180)
 local TabListLayout = Instance.new("UIListLayout", TabContainer)
 
--- Container Konten --
 local ContentContainer = Instance.new("Frame", MainFrame)
-ContentContainer.Size = UDim2.new(1, -150, 1, -40)
-ContentContainer.Position = UDim2.new(0, 150, 0, 40)
+ContentContainer.Size = UDim2.new(1, -140, 1, -40)
+ContentContainer.Position = UDim2.new(0, 140, 0, 40)
 ContentContainer.BackgroundTransparency = 1
 
 -- Animasi Buka/Tutup UI --
-local function toggleUI()
-    if MainFrame.Visible then
-        blur.Enabled = false
-        TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 550, 0, 0)}):Play()
-        task.delay(0.3, function() MainFrame.Visible = false blur.Size = 0 end)
-    else
-        MainFrame.Visible = true
-        MainFrame.Size = UDim2.new(0, 550, 0, 0)
-        blur.Enabled = true
-        TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 550, 0, 400)}):Play()
-        TweenService:Create(blur, TweenInfo.new(0.3), {Size = 10}):Play()
-    end
+local function closeUI()
+    blur.Enabled = false
+    TweenService:Create(MainFrame, TweenInfo.new(0.2), {Size = UDim2.new(0, MainFrame.Size.X.Offset, 0, 0)}):Play()
+    task.delay(0.2, function() MainFrame.Visible = false blur.Size = 0 end)
 end
-ToggleBtn.MouseButton1Click:Connect(toggleUI)
+
+local function openUI()
+    MainFrame.Visible = true
+    local targetY = math.max(MainFrame.Size.Y.Offset, 400)
+    MainFrame.Size = UDim2.new(0, MainFrame.Size.X.Offset, 0, 0)
+    blur.Enabled = true
+    TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, MainFrame.Size.X.Offset, 0, targetY)}):Play()
+    TweenService:Create(blur, TweenInfo.new(0.3), {Size = 10}):Play()
+end
+
+ToggleBtn.MouseButton1Click:Connect(function()
+    if MainFrame.Visible then closeUI() else openUI() end
+end)
+MinBtn.MouseButton1Click:Connect(closeUI)
 
 -- Fungsi Pembuatan UI & Lokalisasi --
 function updateTabsLocalization()
@@ -1257,11 +1208,11 @@ function updateControlsLocalization()
     end
 end
 
-local function CreateToggle(parent, featureKey, valueObj)
+local function CreateToggle(parent, featureKey, valueObj, descText)
     local titleText = getTranslation(featureKey .. "_title")
     local Frame = Instance.new("Frame", parent)
     Frame.Name = featureKey
-    Frame.Size = UDim2.new(0.95, 0, 0, 40)
+    Frame.Size = UDim2.new(0.95, 0, 0, 45)
     Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     Frame.BackgroundTransparency = 0.4
     Frame:SetAttribute("LocalizationKey", featureKey)
@@ -1270,14 +1221,25 @@ local function CreateToggle(parent, featureKey, valueObj)
 
     local Title = Instance.new("TextLabel", Frame)
     Title.Name = "Title"
-    Title.Size = UDim2.new(0.7, 0, 1, 0)
-    Title.Position = UDim2.new(0, 10, 0, 0)
+    Title.Size = UDim2.new(0.7, 0, 0.5, 0)
+    Title.Position = UDim2.new(0, 10, 0, 5)
     Title.BackgroundTransparency = 1
     Title.Text = titleText
     Title.TextColor3 = Color3.fromRGB(230, 230, 230)
     Title.Font = Enum.Font.GothamBold
     Title.TextSize = 13
     Title.TextXAlignment = Enum.TextXAlignment.Left
+
+    local Desc = Instance.new("TextLabel", Frame)
+    Desc.Size = UDim2.new(0.7, 0, 0.5, 0)
+    Desc.Position = UDim2.new(0, 10, 0.5, -2)
+    Desc.BackgroundTransparency = 1
+    Desc.Text = descText or ""
+    Desc.TextColor3 = Color3.fromRGB(150, 150, 150)
+    Desc.Font = Enum.Font.Gotham
+    Desc.TextSize = 10
+    Desc.TextXAlignment = Enum.TextXAlignment.Left
+    Desc.TextTruncate = Enum.TextTruncate.AtEnd
 
     local Btn = Instance.new("TextButton", Frame)
     Btn.Size = UDim2.new(0, 50, 0, 24)
@@ -1302,11 +1264,11 @@ local function CreateToggle(parent, featureKey, valueObj)
     AutoCanvas(parent)
 end
 
-local function CreateCycle(parent, featureKey, valueObj, optionsString)
+local function CreateCycle(parent, featureKey, valueObj, optionsString, descText)
     local titleText = getTranslation(featureKey .. "_title")
     local Frame = Instance.new("Frame", parent)
     Frame.Name = featureKey
-    Frame.Size = UDim2.new(0.95, 0, 0, 40)
+    Frame.Size = UDim2.new(0.95, 0, 0, 45)
     Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     Frame.BackgroundTransparency = 0.4
     Frame:SetAttribute("LocalizationKey", featureKey)
@@ -1315,14 +1277,25 @@ local function CreateCycle(parent, featureKey, valueObj, optionsString)
 
     local Title = Instance.new("TextLabel", Frame)
     Title.Name = "Title"
-    Title.Size = UDim2.new(0.4, 0, 1, 0)
-    Title.Position = UDim2.new(0, 10, 0, 0)
+    Title.Size = UDim2.new(0.4, 0, 0.5, 0)
+    Title.Position = UDim2.new(0, 10, 0, 5)
     Title.BackgroundTransparency = 1
     Title.Text = titleText
     Title.TextColor3 = Color3.fromRGB(230, 230, 230)
     Title.Font = Enum.Font.GothamBold
     Title.TextSize = 13
     Title.TextXAlignment = Enum.TextXAlignment.Left
+    
+    local Desc = Instance.new("TextLabel", Frame)
+    Desc.Size = UDim2.new(0.4, 0, 0.5, 0)
+    Desc.Position = UDim2.new(0, 10, 0.5, -2)
+    Desc.BackgroundTransparency = 1
+    Desc.Text = descText or ""
+    Desc.TextColor3 = Color3.fromRGB(150, 150, 150)
+    Desc.Font = Enum.Font.Gotham
+    Desc.TextSize = 10
+    Desc.TextXAlignment = Enum.TextXAlignment.Left
+    Desc.TextTruncate = Enum.TextTruncate.AtEnd
 
     local Btn = Instance.new("TextButton", Frame)
     Btn.Size = UDim2.new(0, 110, 0, 24)
@@ -1357,11 +1330,11 @@ local function CreateCycle(parent, featureKey, valueObj, optionsString)
     AutoCanvas(parent)
 end
 
-local function CreateSlider(parent, featureKey, valueObj, min, max)
+local function CreateSlider(parent, featureKey, valueObj, min, max, descText)
     local titleText = getTranslation(featureKey .. "_title")
     local Frame = Instance.new("Frame", parent)
     Frame.Name = featureKey
-    Frame.Size = UDim2.new(0.95, 0, 0, 50)
+    Frame.Size = UDim2.new(0.95, 0, 0, 55)
     Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     Frame.BackgroundTransparency = 0.4
     Frame:SetAttribute("LocalizationKey", featureKey)
@@ -1379,6 +1352,17 @@ local function CreateSlider(parent, featureKey, valueObj, min, max)
     Title.TextSize = 13
     Title.TextXAlignment = Enum.TextXAlignment.Left
     
+    local Desc = Instance.new("TextLabel", Frame)
+    Desc.Size = UDim2.new(0.7, 0, 0.4, 0)
+    Desc.Position = UDim2.new(0, 10, 0.4, 2)
+    Desc.BackgroundTransparency = 1
+    Desc.Text = descText or ""
+    Desc.TextColor3 = Color3.fromRGB(150, 150, 150)
+    Desc.Font = Enum.Font.Gotham
+    Desc.TextSize = 10
+    Desc.TextXAlignment = Enum.TextXAlignment.Left
+    Desc.TextTruncate = Enum.TextTruncate.AtEnd
+    
     local ValText = Instance.new("TextLabel", Frame)
     ValText.Size = UDim2.new(0.2, 0, 0.4, 0)
     ValText.Position = UDim2.new(0.8, -10, 0, 5)
@@ -1390,8 +1374,8 @@ local function CreateSlider(parent, featureKey, valueObj, min, max)
     ValText.TextXAlignment = Enum.TextXAlignment.Right
 
     local SliderBar = Instance.new("TextButton", Frame)
-     SliderBar.Size = UDim2.new(1, -20, 0, 8)
-    SliderBar.Position = UDim2.new(0, 10, 0.7, 0)
+    SliderBar.Size = UDim2.new(1, -20, 0, 8)
+    SliderBar.Position = UDim2.new(0, 10, 0.75, 0)
     SliderBar.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
     SliderBar.Text = ""
     SliderBar.AutoButtonColor = false
@@ -1446,14 +1430,15 @@ for _, tabInfo in ipairs(sortedTabs) do
         local valObj = PlusFolderSettings:FindFirstChild(fName, true)
         
          if valObj then
-            if fData.InstanceType == "BoolValue" then CreateToggle(scroll, fName, valObj)
+            local desc = valObj:GetAttribute("DisplayDescription") or ""
+            if fData.InstanceType == "BoolValue" then CreateToggle(scroll, fName, valObj, desc)
             elseif fData.InstanceType == "StringValue" then
                 local opts = fData.ExtraData and fData.ExtraData.Options or ""
-                CreateCycle(scroll, fName, valObj, opts)
+                CreateCycle(scroll, fName, valObj, opts, desc)
             elseif fData.InstanceType == "NumberValue" then
                 local min = fData.ExtraData and fData.ExtraData.MinValue or 0
                 local max = fData.ExtraData and fData.ExtraData.MaxValue or 100
-                CreateSlider(scroll, fName, valObj, min, max)
+                CreateSlider(scroll, fName, valObj, min, max, desc)
             end
         end
     end
