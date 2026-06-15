@@ -1097,7 +1097,9 @@ ThreadManager:Start("FeatureHandler", function()
     local Features = FeatureLoadout["Features"]
     local Visuals = FeatureLoadout["Visuals"]
 
-    if FeatureLoadout["ExploitFunctions"]["Computer"]["Instance"] then FeatureLoadout["ExploitFunctions"]["Computer"]["Instance"].Value = UserInputService.KeyboardEnabled end
+    if FeatureLoadout["ExploitFunctions"] and FeatureLoadout["ExploitFunctions"]["Computer"] and FeatureLoadout["ExploitFunctions"]["Computer"]["Instance"] then 
+        FeatureLoadout["ExploitFunctions"]["Computer"]["Instance"].Value = UserInputService.KeyboardEnabled 
+    end
 
     task.spawn(function()
         if LocalRoot and not IsFixingGenerator and Automation["AutoGeneratorPuzzle"]["Instance"] and Automation["AutoGeneratorPuzzle"]["Instance"].Value and GameMap then
@@ -1383,7 +1385,7 @@ MainFrame.Parent = PradaxcaUI
 MainFrame.Size = UDim2.new(0, 500, 0, 330)
 MainFrame.Position = UDim2.new(0.5, -250, 0.5, -165)
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-MainFrame.BackgroundTransparency = 1 -- changed so background image stays visible
+MainFrame.BackgroundTransparency = 1
 MainFrame.ClipsDescendants = true
 MainFrame.Visible = false
 MainFrame.Active = true
@@ -1665,8 +1667,8 @@ local function CreateToggle(parent, rawTitle, instanceVal, func, featureKey)
         instanceVal.Value = not instanceVal.Value
         TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = instanceVal.Value and Color3.fromRGB(0, 200, 125) or Color3.fromRGB(60, 60, 60)}):Play()
         TweenService:Create(circle, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Position = instanceVal.Value and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)}):Play()
-        if func then func(FeatureLoadout, instanceVal.Value) end
     end)
+    return frame
 end
 
 local function CreateSlider(parent, rawTitle, instanceVal, min, max, func, featureKey)
@@ -1729,9 +1731,9 @@ local function CreateSlider(parent, rawTitle, instanceVal, min, max, func, featu
             if featureKey == "ExtendedFOV" then
                 workspace.CurrentCamera.FieldOfView = val
             end
-            if func then func(FeatureLoadout, val) end
         end
     end)
+    return frame
 end
 
 local function CreateDropdown(parent, rawTitle, instanceVal, optionsString, func, featureKey)
@@ -1793,7 +1795,6 @@ local function CreateDropdown(parent, rawTitle, instanceVal, optionsString, func
                 instanceVal.Value = opt
                 lbl.Text = displayTitle .. " : " .. tostring(opt)
                 listFrame.Visible = false
-                if func then func(FeatureLoadout, opt) end
             end)
         end
     end
@@ -1803,6 +1804,8 @@ local function CreateDropdown(parent, rawTitle, instanceVal, optionsString, func
     instanceVal:GetAttributeChangedSignal("Options"):Connect(buildOptions)
     
     dropBtn.MouseButton1Click:Connect(function() listFrame.Visible = not listFrame.Visible end)
+    
+    return frame
 end
 
 -- Link Data to Custom UI
@@ -1810,7 +1813,7 @@ PlusFolderSettings.Name = "shen"
 PlusFolderSettings.Parent = PlayerData
 
 for TabName, TabContents in pairs(FeatureLoadout) do
-    if TabName == "ExploitFunctions" or TabName == "Outdated" or TabName == "Unofficial" then continue end
+    if TabName == "Outdated" or TabName == "Unofficial" then continue end
     
     local targetTab
     if TabName == "Automation" then targetTab = TabAuto
@@ -1839,16 +1842,69 @@ for TabName, TabContents in pairs(FeatureLoadout) do
             if SettingData.ScriptFunction then SettingData.ScriptFunction(FeatureLoadout[TabName][SettingName], NewInstance.Value) end
         end)
 
+        local uiFrame = nil
+
         if targetTab then
             local cleanTitle = SettingData.DisplayTitle:gsub("<[^>]+>", "")
             if SettingData.InstanceType == "BoolValue" then
-                CreateToggle(targetTab, cleanTitle, NewInstance, SettingData.ScriptFunction, SettingName)
+                uiFrame = CreateToggle(targetTab, cleanTitle, NewInstance, SettingData.ScriptFunction, SettingName)
             elseif SettingData.InstanceType == "NumberValue" then
                 local min = SettingData.ExtraData and SettingData.ExtraData.MinValue or 0
                 local max = SettingData.ExtraData and SettingData.ExtraData.MaxValue or 100
-                CreateSlider(targetTab, cleanTitle, NewInstance, min, max, SettingData.ScriptFunction, SettingName)
+                uiFrame = CreateSlider(targetTab, cleanTitle, NewInstance, min, max, SettingData.ScriptFunction, SettingName)
             elseif SettingData.InstanceType == "StringValue" and SettingData.ExtraData and SettingData.ExtraData.Options then
-                CreateDropdown(targetTab, cleanTitle, NewInstance, SettingData.ExtraData.Options, SettingData.ScriptFunction, SettingName)
+                uiFrame = CreateDropdown(targetTab, cleanTitle, NewInstance, SettingData.ExtraData.Options, SettingData.ScriptFunction, SettingName)
+            end
+        end
+
+        -- PERBAIKAN: Terapkan Requirement Visibility Control ke PradaxcaUI (Sama seperti Script.txt)
+        if uiFrame and SettingData.ExtraData and SettingData.ExtraData.Requirement then
+            local reqData = SettingData.ExtraData.Requirement
+            
+            local function checkReq()
+                if type(reqData) == "boolean" then return reqData end
+                local reqs = string.split(tostring(reqData), "|")
+                for _, req in ipairs(reqs) do
+                    if req == "true" then return true end
+                    if req == "false" then return false end
+                    local reqName = req:match("([^~=]+)")
+                    local reqInst = PlusFolderSettings:FindFirstChild(reqName, true)
+                    if reqInst then
+                        if req:find("~") then
+                            if tostring(reqInst.Value) == req:match("~(.+)") then return false end
+                        elseif req:find("=") then
+                            if tostring(reqInst.Value) ~= req:match("=(.+)") then return false end
+                        else
+                            if not reqInst.Value then return false end
+                        end
+                    else
+                        return false 
+                    end
+                end
+                return true
+            end
+
+            local function updateVisibility()
+                uiFrame.Visible = checkReq()
+            end
+
+            if type(reqData) == "string" then
+                local reqs = string.split(reqData, "|")
+                for _, req in ipairs(reqs) do
+                    local reqName = req:match("([^~=]+)")
+                    if reqName then
+                        task.spawn(function()
+                            task.wait(0.2)
+                            local reqInst = PlusFolderSettings:FindFirstChild(reqName, true)
+                            if reqInst then
+                                reqInst:GetPropertyChangedSignal("Value"):Connect(updateVisibility)
+                            end
+                            updateVisibility()
+                        end)
+                    end
+                end
+            else
+                updateVisibility()
             end
         end
 
@@ -1872,4 +1928,4 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
-ColoredPrint("Shenxiue (pradaxca UI) has loaded successfully","success",Color3.fromRGB(0, 200, 125))
+ColoredPrint("Shenxiue (pradaxca UI) Remastered Loaded","success",Color3.fromRGB(0, 200, 125))
