@@ -1,27 +1,16 @@
--- Pradaxca Plus Standalone UI --
--- FULL TEXTURE, DRAGGABLE, RESIZABLE, EN/ZH & FULL LOGIC EDITION --
+-- Forsaken Plus Made by Naiko Exploits
+-- UI Overhaul by Pradaxca
 
 if workspace.DistributedGameTime < 3 then
 	task.wait(3 - workspace.DistributedGameTime)
 end
 
-local StarterGui = game:GetService("StarterGui")
-local isCorrectGame = (game.GameId == 6331902150 or game.GameId == 7464167604 or workspace:GetAttribute("ServerType") ~= nil)
-
-if not isCorrectGame then
-    pcall(function()
-        StarterGui:SetCore("SendNotification", {Title = "Pradaxca Plus", Text = "Failed! This script is for Forsaken.", Duration = 5})
-    end)
-	return warn("Incorrect game")
-end
-
-local targetGui = game:GetService("CoreGui")
-pcall(function() if gethui then targetGui = gethui() end end)
-
-if targetGui:FindFirstChild("ForsakenPlusUI_Pradaxca") then
+if game.CoreGui:FindFirstChild("PradaxcaUI") or game.CoreGui:FindFirstChild("Plus") then
     return warn("Script already running")
+elseif game.GameId == 6331902150 or game.GameId == 7464167604 or workspace:GetAttribute("ServerType") then
+	Instance.new("BoolValue", game.CoreGui).Name = "Plus"
 else
-	Instance.new("BoolValue", targetGui).Name = "ForsakenPlusUI_Pradaxca"
+	return warn("Incorrect game")
 end
 
 game:GetService("Players").LocalPlayer.Idled:Connect(function()
@@ -29,7 +18,8 @@ game:GetService("Players").LocalPlayer.Idled:Connect(function()
 end)
 
 -- General Variables --
-local Version = "1.6"
+
+local Version = "1.4"
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local LocalCharacter = LocalPlayer.Character
@@ -37,9 +27,14 @@ local LocalHumanoid = LocalCharacter and (LocalCharacter:FindFirstChildOfClass("
 local LocalHead = LocalCharacter and (LocalCharacter:FindFirstChild("Head") or LocalCharacter:WaitForChild("Head",2)) or nil
 local LocalRoot = LocalCharacter and ((LocalHumanoid and LocalHumanoid.RootPart) or LocalCharacter:FindFirstChild("HumanoidRootPart") or LocalCharacter:WaitForChild("HumanoidRootPart",2)) or nil
 local SpeedMultipliers = LocalCharacter and (LocalCharacter:FindFirstChild("SpeedMultipliers")) or nil
+local CoreGui = game:GetService("CoreGui")
 local PlayerGui = LocalPlayer:FindFirstChildOfClass("PlayerGui") or LocalPlayer:WaitForChild("PlayerGui", 20)
+local MainUI = PlayerGui:FindFirstChild("MainUI") or PlayerGui:WaitForChild("MainUI", 60)
 local PlayerData = LocalPlayer:FindFirstChild("PlayerData") or LocalPlayer:WaitForChild("PlayerData", 20)
 local PlusFolderSettings = Instance.new("Folder")
+
+local KillersFolder = workspace:WaitForChild("Players"):WaitForChild("Killers")
+local SurvivorsFolder = workspace:WaitForChild("Players"):WaitForChild("Survivors")
 local MarketplaceService = game:GetService("MarketplaceService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
@@ -47,6 +42,7 @@ local TextChatService = game:GetService("TextChatService")
 local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
 local Lighting = game:GetService("Lighting")
 local Debris = game:GetService("Debris")
 local Network = ReplicatedStorage:FindFirstChild("Modules") and (ReplicatedStorage:FindFirstChild("Modules"):FindFirstChild("Network",true) and ReplicatedStorage:FindFirstChild("Modules"):FindFirstChild("Network",true):FindFirstChild("Network")) or ReplicatedStorage:FindFirstChild("Modules"):FindFirstChild("Network",true) or nil
@@ -55,91 +51,63 @@ local GameMap = InGame and InGame:FindFirstChild("Map") or nil
 local RoundEvent = Instance.new("BindableEvent")
 local BindableShouldStop = Instance.new("BindableEvent")
 local IsUnderground,IsFixingGenerator,WarnedAboutFilesCompatability = false,false,false
-local PlaySound,MainModule,HandlePrivacySettings,Check,TableValueFind,ColoredPrint,Handle007n7NPC,HandleNoliNPC,ChangeTrackWithOverride,LastTrack,NoliConfig,IsHitboxNotNear,GoUnder,HandleAllowJumping,GetValue
+local PlaySound,MainModule,HandlePrivacySettings,Check,RichTextGradientColor,IsHitboxNotNear,IsPoisonOnPosition,GoUnder,HandleAllowJumping,HandleNoliNPC,ChangeTrackWithOverride,LastTrack,NoliConfig,TableValueFind,ColoredPrint,Handle007n7NPC,GetValue
 local ColorPresets = {["White"] = Color3.fromRGB(255,255,255),["Teal"] = Color3.fromRGB(3,252,157),["Green"] = Color3.fromRGB(0,255,0),["Purple"] = Color3.fromRGB(128,0,128),["Red"] = Color3.fromRGB(255,0,0),["Blue"] = Color3.fromRGB(0,0,255),["Cyan"] = Color3.fromRGB(0,255,255),["Gold"] = Color3.fromRGB(255,215,0),["Orange"] = Color3.fromRGB(255,165,0)}
+local IgnoreKeybinds = {"W", "A", "S", "D"}
 local GameVersionForScript = "2026-06-12"
 local OverriddenAnimations = {}
 local Worked,CurrentGameVersion = pcall(function() return MarketplaceService:GetProductInfoAsync(game.PlaceId,Enum.InfoType.Asset)["Updated"] end) ;
 CurrentGameVersion = Worked and CurrentGameVersion or GameVersionForScript
 local AllAnimations = {}
 local FeatureLoadout;
-
--- Localization (Kamus Bahasa Lengkap) --
-local Localization = {
-    ["EN"] = {
-        ["Settings"] = "Settings", ["Language"] = "Language", ["English"] = "English", ["Mandarin"] = "简体中文",
-        ["Hacks"] = "Hacks", ["Automation"] = "Automation", ["Features"] = "Features", ["Visuals"] = "Visuals", ["Miscellaneous"] = "Misc", ["Information"] = "Information",
-        ["language_setting_title"] = "Language", ["hookmetamethod_title"] = "HookMetaMethod", ["getgc_title"] = "GetGC", ["require_title"] = "Require", ["files_title"] = "Files", ["Computer_title"] = "Computer",
-        ["AutoGeneratorPuzzle_title"] = "Auto Generators", ["AutoPickup_title"] = "Auto Pickup Items",
-        ["Invincible_title"] = "God Mode (Ghost)", ["DisableKillerWalls_title"] = "Disable Red Walls", ["DisableToxicTrails_title"] = "Disable Toxic Trails", ["DisableFootprints_title"] = "Disable Footprints", ["SmallerSpikeCollisions_title"] = "Smaller Spike Collisions", ["EnableJumping_title"] = "Enable Jumping", ["StaminaPreset_title"] = "Stamina Hack", ["AntiSlowness_title"] = "Anti Slowness", ["AnimationChanger_title"] = "Animation Changer", ["NoliControl_title"] = "Better Void Rush", ["ControllableDash_title"] = "Controllable Dash",
-        ["DisableNoliNPC_title"] = "Disable Noli NPC", ["Disable007n7NPC_title"] = "Disable 007n7 NPC", ["ESP_title"] = "Master ESP", ["KillersESP_title"] = "Killers ESP", ["KillersColor_title"] = "Killers Color", ["SurvivorsESP_title"] = "Survivors ESP", ["SurvivorsColor_title"] = "Survivors Color", ["GeneratorsESP_title"] = "Generators ESP", ["GeneratorsColor_title"] = "Generators Color", ["GeneratorsCheck_title"] = "Hide Completed Generators", ["ItemsESP_title"] = "Items ESP", ["ItemsColor_title"] = "Items Color", ["ESPName_title"] = "Name ESP", ["ESPBox_title"] = "2D Box ESP", ["ESPTracer_title"] = "Tracer ESP",
-        ["ExtendedFOV_title"] = "FOV POV Hack", ["ExtendedZoom_title"] = "Extended Zoom", ["ShowChat_title"] = "Show Chat", ["ShowPrivacy_title"] = "Show Privacy Info", ["HideInjury_title"] = "Hide Injury Effects", ["DeleteRagdolls_title"] = "Delete Ragdolls", ["CrashTarget_title"] = "Crash Target", ["SkyGlitch_title"] = "Sky Glitch (Everyone)", ["InstantKill_title"] = "Instant Kill", ["Rejoin_title"] = "Rejoin",
-        ["dev_info"] = "Developer: pradaxca", ["tele_info"] = "Telegram: @pradaxca", ["tiktok_info"] = "TikTok: @pradaxca", ["status_info"] = "Status: Free", ["start_notif"] = "Pradaxca Plus loaded in English!",
-    },
-    ["ZH"] = {
-        ["Settings"] = "设置", ["Language"] = "语言", ["English"] = "English", ["Mandarin"] = "简体中文",
-        ["Hacks"] = "漏洞利用", ["Automation"] = "自动化", ["Features"] = "特点", ["Visuals"] = "透视", ["Miscellaneous"] = "其他", ["Information"] = "信息",
-        ["language_setting_title"] = "语言", ["hookmetamethod_title"] = "HookMetaMethod", ["getgc_title"] = "GetGC", ["require_title"] = "Require", ["files_title"] = "文件", ["Computer_title"] = "电脑模式",
-        ["AutoGeneratorPuzzle_title"] = "自动发电机", ["AutoPickup_title"] = "自动拾取物品",
-        ["Invincible_title"] = "无敌 (幽灵)", ["DisableKillerWalls_title"] = "禁用红墙", ["DisableToxicTrails_title"] = "禁用毒液轨迹", ["DisableFootprints_title"] = "禁用脚印", ["SmallerSpikeCollisions_title"] = "缩小尖刺碰撞", ["EnableJumping_title"] = "启用跳跃", ["StaminaPreset_title"] = "体力透支", ["AntiSlowness_title"] = "反减速", ["AnimationChanger_title"] = "动画修改器", ["NoliControl_title"] = "更好的虚空冲刺", ["ControllableDash_title"] = "可控冲刺",
-        ["DisableNoliNPC_title"] = "禁用 Noli NPC", ["Disable007n7NPC_title"] = "禁用 007n7 NPC", ["ESP_title"] = "透视开关", ["KillersESP_title"] = "杀手透视", ["KillersColor_title"] = "杀手颜色", ["SurvivorsESP_title"] = "幸存者透视", ["SurvivorsColor_title"] = "幸存者颜色", ["GeneratorsESP_title"] = "发电机透视", ["GeneratorsColor_title"] = "发电机颜色", ["GeneratorsCheck_title"] = "隐藏已完成发电机", ["ItemsESP_title"] = "物品透视", ["ItemsColor_title"] = "物品颜色", ["ESPName_title"] = "名字透视", ["ESPBox_title"] = "2D 方框透视", ["ESPTracer_title"] = "射线透视",
-        ["ExtendedFOV_title"] = "FOV POV 视野", ["ExtendedZoom_title"] = "扩展缩放", ["ShowChat_title"] = "显示聊天", ["ShowPrivacy_title"] = "显示隐私信息", ["HideInjury_title"] = "隐藏受伤效果", ["DeleteRagdolls_title"] = "删除布娃娃", ["CrashTarget_title"] = "崩溃目标", ["SkyGlitch_title"] = "天空闪烁 (所有人)", ["InstantKill_title"] = "秒杀", ["Rejoin_title"] = "重新加入",
-        ["dev_info"] = "开发者: pradaxca", ["tele_info"] = "Telegram: @pradaxca", ["tiktok_info"] = "TikTok: @pradaxca", ["status_info"] = "状态: 免费", ["start_notif"] = "Pradaxca Plus 已加载简体中文!",
-    }
-}
-
-local currentLang = "EN"
-local function getTranslation(key) return Localization[currentLang][key] or key end
-
--- Database FeatureLoadout (SEMUA DEFAULT DIMATIKAN/FALSE SAAT STARTUP) --
 FeatureLoadout = {
-    ["Settings"] = {
-        ["TabAttributes"] = { ["LayoutOrder"] = 0 },
-        ["Language"] = {
-            ["DisplayDescription"] = "Change UI Language", ["InstanceType"] = "StringValue", ["DefaultInstanceValue"] = "EN", ["Savable"] = true,
-            ["ExtraData"] = { ["Options"] = "EN|ZH" },
-            ["ScriptFunction"] = function(self, Value) currentLang = Value updateLocalization() end
-        },
-    },
-    ["Hacks"] = {
-        ["TabAttributes"] = { ["LayoutOrder"] = 1 },
-        ["hookmetamethod"] = { ["DisplayDescription"] = "Required for bypasses", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = true, ["ExtraData"] = { ["Requirement"] = true }, ["ScriptFunction"] = function(self, State) end },
-        ["getgc"] = { ["DisplayDescription"] = "Required for GC exploits", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = true, ["ExtraData"] = { ["Requirement"] = true }, ["ScriptFunction"] = function(self, State) end },
-        ["require"] = { ["DisplayDescription"] = "Required to read internal scripts", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = true, ["ExtraData"] = { ["Requirement"] = true }, ["ScriptFunction"] = function(self, State) end },
-        ["files"] = { ["DisplayDescription"] = "Required for saving configs", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = true, ["ExtraData"] = { ["Requirement"] = true }, ["ScriptFunction"] = function(self, State) end },
-        ["Computer"] = { ["DisplayDescription"] = "Required for keyboard bypass", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = true, ["ExtraData"] = { ["Requirement"] = true }, ["ScriptFunction"] = function(self, State) end },
+    ["ExploitFunctions"] = {
+          ["TabAttributes"] = {["DisplayTitle"] = "Loading...",["LayoutOrder"] = 666},
+        ["hookmetamethod"] = {["DisplayDescription"] = " ",["DisplayTitle"] = "hookmetamethod",["LayoutOrder"] = 666,["Savable"] = false,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = true,["ExtraData"] = {["Requirement"] = true,},["ScriptFunction"] = function(self, State) end},
+        ["getgc"] = {["DisplayDescription"] = " ",["DisplayTitle"] = "getgc",["LayoutOrder"] = 666,["Savable"] = false,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = true,["ExtraData"] = {["Requirement"] = true,},["ScriptFunction"] = function(self, State) end},
+        ["require"] = {["DisplayDescription"] = " ",["DisplayTitle"] = "require",["LayoutOrder"] = 666,["Savable"] = false,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = true,["ExtraData"] = {["Requirement"] = true,},["ScriptFunction"] = function(self, State) end},
+        ["files"] = {["DisplayDescription"] = " ",["DisplayTitle"] = "files",["LayoutOrder"] = 666,["Savable"] = false,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = true,["ExtraData"] = {["Requirement"] = true,},["ScriptFunction"] = function(self, State) end},
+        ["OfficialGame"] = {["DisplayDescription"] = " ",["DisplayTitle"] = "Official Game",["LayoutOrder"] = 666,["Savable"] = false,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = game.GameId == 6331902150 or game.GameId == 7464167604,["ExtraData"] = {["Requirement"] = true,},["ScriptFunction"] = function(self, State) end},
+        ["PrivateServer"] = {["DisplayDescription"] = " ",["DisplayTitle"] = "Private Server",["LayoutOrder"] = 666,["Savable"] = false,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = workspace:GetAttribute("ServerType") == "VIP",["ExtraData"] = {["Requirement"] = true,},["ScriptFunction"] = function(self, State) end},
+        ["PrivateServerOwner"] = {["DisplayDescription"] = " ",["DisplayTitle"] = "Private Server",["LayoutOrder"] = 666,["Savable"] = false,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = workspace:GetAttribute("ServerOwnerID") == LocalPlayer.UserId,["ExtraData"] = {["Requirement"] = true,},["ScriptFunction"] = function(self, State) end},
+        ["NServer"] = {["DisplayDescription"] = " ",["DisplayTitle"] = "N Server",["LayoutOrder"] = 666,["Savable"] = false,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = game.PlaceId == 83645629621104,["ExtraData"] = {["Requirement"] = true,},["ScriptFunction"] = function(self, State) end},
+        ["Computer"] = {["DisplayDescription"] = " ",["DisplayTitle"] = "Computer",["LayoutOrder"] = 666,["Savable"] = false,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = UserInputService.KeyboardEnabled,["ExtraData"] = {["Requirement"] = true,},["ScriptFunction"] = function(self, State) end},
     },
     ["Automation"] = {
-        ["TabAttributes"] = { ["LayoutOrder"] = 2 },
-        ["AutoGeneratorPuzzle"] = { ["DisplayDescription"] = "Auto-completes generator puzzles", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) end },
-        ["AutoPickup"] = { ["DisplayDescription"] = "Automatically pick up items near you", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) end },
+        ["TabAttributes"] = {["DisplayTitle"] = "Automation",["LayoutOrder"] = 1},
+        ["AutoGeneratorPuzzle"] = {["DisplayDescription"] = "Auto-Completes Generator Puzzles",["DisplayTitle"] = "Auto Generator(s)",["LayoutOrder"] = 1,["Savable"] = true,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = false,["ExtraData"] = {},["ScriptFunction"] = function(self, Value) end},
+        ["AutoPickup"] = {["DisplayDescription"] = "Auto-Picks up Items near you",["DisplayTitle"] = "Auto Pickup",["LayoutOrder"] = 2,["Savable"] = true,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = false,["ExtraData"] = {},["ScriptFunction"] = function(self, Value) end},
     },
     ["Features"] = {
-        ["TabAttributes"] = { ["LayoutOrder"] = 3 },
+        ["TabAttributes"] = {["DisplayTitle"] = "Features",["LayoutOrder"] = 2},
         ["Invincible"] = {
-            ["DisplayDescription"] = "Makes you invisible & god mode", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["ExtraData"] = { ["Requirement"] = "hookmetamethod|require" },
+            ["DisplayDescription"] = "Makes you invisible & god mode (you can still use abilities)",["DisplayTitle"] = "Invincible",["LayoutOrder"] = 1,["Savable"] = false,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = false,
+            ["ExtraData"] = {["Requirement"] = "hookmetamethod|require|OfficialGame"},
             ["ScriptFunction"] = function(self, Value)
-                 if workspace:GetAttribute("Invincible") == nil then
+                if workspace:GetAttribute("Invincible") == nil then
                     workspace:SetAttribute("Invincible", Value)
                     self.Instance.Value = Value
                     if Value then
-                        FeatureLoadout["Features"]["DisableToxicTrails"].Instance.Value = true
-                        FeatureLoadout["Features"]["DisableFootprints"].Instance.Value = true
+                        if FeatureLoadout["Features"]["DisableToxicTrails"].Instance then FeatureLoadout["Features"]["DisableToxicTrails"].Instance.Value = true end
+                        if FeatureLoadout["Features"]["DisableFootprints"].Instance then FeatureLoadout["Features"]["DisableFootprints"].Instance.Value = true end
                     end
                     task.delay(1.5, function() workspace:SetAttribute("Invincible",nil) end)
                     GoUnder(Value)
-                else self.Instance.Value = workspace:GetAttribute("Invincible") end
+                else
+                    self.Instance.Value = workspace:GetAttribute("Invincible")
+                end
             end
-         },
+        },
         ["DisableKillerWalls"] = {
-            ["DisplayDescription"] = "Walk through killer red walls", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["ExtraData"] = { ["Requirement"] = true },
+            ["DisplayDescription"] = "Disables All Killer Walls (Red Walls)",["DisplayTitle"] = "Disable Killer Walls",["LayoutOrder"] = 2,["Savable"] = false,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = false,
+            ["ExtraData"] = {["Requirement"] = true},
             ["ScriptFunction"] = function(self, Value)
                 local VertexColor = Value and Vector3.new(0,255,0) or Vector3.new(255,0,0)
                 local Color = Value and Color3.new(0,1,0) or Color3.new(1,0,0)
                 local KillerDoorsFolder = GameMap and (GameMap:FindFirstChild("KillerDoors",true) or GameMap:FindFirstChild("Killer Doors",true))
                 local KillerCollisions = GameMap and GameMap:FindFirstChild("KillerOnly",true)
                 if KillerDoorsFolder then
-                    for i,v in pairs(KillerDoorsFolder:GetChildren()) do
+                    for i,v in KillerDoorsFolder:GetChildren() do
                         v.Color = Color
                         if v:GetAttribute("OriginalCanCollide") == nil then v:SetAttribute("OriginalCanCollide", v.CanCollide) end
                         v.CanCollide = v:GetAttribute("OriginalCanCollide") ~= false and not Value or false
@@ -149,125 +117,256 @@ FeatureLoadout = {
                             Params.CollisionGroup = "Killers"
                             Params.FilterDescendantsInstances = {KillerCollisions}
                             local Hitbox = workspace:GetPartBoundsInRadius(v.Position, 10, Params)
-                            for i,h in pairs(Hitbox) do h.CanCollide = not Value end
+                            for i,v in Hitbox do v.CanCollide = not Value end
                         end
                         if v:FindFirstChildOfClass("SpecialMesh") then v:FindFirstChildOfClass("SpecialMesh").VertexColor = VertexColor end
                     end
                 end
             end
         },
-        ["DisableToxicTrails"] = { ["DisplayDescription"] = "Disables damaging trails for John Doe", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) for i,v in pairs(InGame:GetChildren()) do if v:IsA("Folder") and (v.Name):find("JohnDoeTrail") then for i,v2 in pairs(v:GetChildren()) do if v2:IsA("BasePart") then v2.CanTouch = not Value end end end end end },
-        ["DisableFootprints"] = { ["DisplayDescription"] = "Disables footprints made by John Doe", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) for i,v in pairs(InGame:GetChildren()) do if v:IsA("Folder") and (v.Name):find("Shadows") then for i,v2 in pairs(v:GetChildren()) do if v2:IsA("BasePart") then v2.CanTouch = not Value end end if not v:GetAttribute("Checked") then v:SetAttribute("Checked", true) v.ChildAdded:Connect(function(GrandChild) if GrandChild:IsA("BasePart") then GrandChild.CanTouch = not FeatureLoadout["Features"]["DisableFootprints"]["Instance"].Value end end) end end end end },
-        ["SmallerSpikeCollisions"] = { ["DisplayDescription"] = "Makes spike collisions smaller", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) for i,v in pairs(InGame:GetChildren()) do if v.Name == "SpikeCollision" then v.Size = Value and Vector3.new(10,3.25,3.25) or Vector3.new(11, 5, 5) v.Shape = Value and Enum.PartType.Cylinder or Enum.PartType.Block end end end },
-        ["EnableJumping"] = { ["DisplayDescription"] = "Enables jumping when it's disabled", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["ScriptFunction"] = function(self, Value) HandleAllowJumping(Value) end },
-        ["StaminaPreset"] = { ["DisplayDescription"] = "Modify your stamina limits", ["InstanceType"] = "StringValue", ["DefaultInstanceValue"] = "Original", ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "require", ["Options"] = "Original|Realistic|Semi-Realistic|Infinite" }, ["ScriptFunction"] = function(self, Value) end },
-        ["AntiSlowness"] = { ["DisplayDescription"] = "Removes slowness effects", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) if not Value or not SpeedMultipliers then return end for i,Child in pairs(SpeedMultipliers:GetChildren()) do Check(Child) end end },
-        ["AnimationChanger"] = { ["DisplayDescription"] = "Override your animations", ["InstanceType"] = "StringValue", ["DefaultInstanceValue"] = "Original", ["ExtraData"] = { ["Requirement"] = "require", ["Options"] = "Original|Jason|Slasher|c00lkidd|John Doe|Noli|1x1x1x1|Nosferatu|Azure|!Herobrine|!Brimstone" }, ["ScriptFunction"] = function(self, Value) if Value == "Original" then BindableShouldStop:Fire() else local Animator = LocalHumanoid and LocalHumanoid:FindFirstChildOfClass("Animator") if ChangeTrackWithOverride then for i,v in pairs(Animator:GetPlayingAnimationTracks()) do ChangeTrackWithOverride(v,Value,true) end end end end },
-        ["NoliControl"] = { ["DisplayDescription"] = "Better control of Void Rush", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "require" }, ["ScriptFunction"] = function(self, Value) if NoliConfig then for _, Entry in pairs({ {Name = "InitialTurnDuration", Value = 0.005, Default = 1.5}, {Name = "TurnSpeed", Value = 10000, Default = 1}, {Name = "InitialTurnMult", Value = 1000, Default = 6.6}, }) do local Key, _, Parent = TableValueFind(NoliConfig, function(i, v) return type(i) == "string" and i:find(Entry.Name) and not i:find(Entry.Name .. "OG") end) if Key and Parent then if Value then Parent[Entry.Name .. "OG"] = Parent[Key] Parent[Key] = Entry.Value elseif Parent[Entry.Name .. "OG"] ~= nil then Parent[Key] = Parent[Entry.Name .. "OG"] or Entry.Default end end end if LocalCharacter and LocalCharacter.Parent.Name == "Killers" and not workspace:GetAttribute("NotifCD") then StarterGui:SetCore("SendNotification", { Title = "Information", Text = "Changes apply as killer", Duration = 5 }) workspace:SetAttribute("NotifCD", true) task.delay(10, function() workspace:SetAttribute("NotifCD", nil) end) end end end },
-        ["ControllableDash"] = { ["DisplayDescription"] = "Control where dash goes", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) end }
+        ["DisableToxicTrails"] = {
+            ["DisplayDescription"] = "Disables damaging trails for john doe",["DisplayTitle"] = "Disable John Doe's Trails",["LayoutOrder"] = 3,["Savable"] = true,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = false,["ExtraData"] = {},
+            ["ScriptFunction"] = function(self, Value)
+                if not InGame then return end
+                for i,v in InGame:GetChildren() do
+                    if v:IsA("Folder") and (v.Name):find("JohnDoeTrail") then
+                        for i,v2 in v:GetChildren() do if v2:IsA("BasePart") then v2.CanTouch = not Value end end
+                    end
+                end
+            end
+        },
+        ["DisableFootprints"] = {
+            ["DisplayDescription"] = "Disables footprints made by john doe",["DisplayTitle"] = "Disable John Doe's Footprints",["LayoutOrder"] = 4,["Savable"] = true,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = false,["ExtraData"] = {},
+            ["ScriptFunction"] = function(self, Value)
+                if not InGame then return end
+                for i,v in InGame:GetChildren() do
+                    if v:IsA("Folder") and (v.Name):find("Shadows") then
+                        for i,v2 in v:GetChildren() do if v2:IsA("BasePart") then v2.CanTouch = not Value end end
+                        if not v:GetAttribute("Checked") then
+                            v:SetAttribute("Checked", true)
+                            v.ChildAdded:Connect(function(GrandChild)
+                                if GrandChild:IsA("BasePart") then GrandChild.CanTouch = not FeatureLoadout["Features"]["DisableFootprints"]["Instance"].Value end
+                            end)
+                        end
+                    end
+                end
+            end
+        },
+        ["SmallerSpikeCollisions"] = {
+            ["DisplayDescription"] = "Makes spike collisions smaller for john doe's ability",["DisplayTitle"] = "Smaller Spike Collisions",["LayoutOrder"] = 5,["Savable"] = true,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = false,["ExtraData"] = {},
+            ["ScriptFunction"] = function(self, Value)
+                if not InGame then return end
+                for i,v in InGame:GetChildren() do
+                    if v.Name == "SpikeCollision" then
+                        v.Size = Value and Vector3.new(10,3.25,3.25) or Vector3.new(11, 5, 5)
+                        v.Shape = Value and Enum.PartType.Cylinder or Enum.PartType.Block
+                    end
+                end
+            end
+        },
+        ["EnableJumping"] = {["DisplayDescription"] = "Enables Jumping for when its disabled",["DisplayTitle"] = "Enable Jumping",["LayoutOrder"] = 7,["Savable"] = false,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = false,["ExtraData"] = {},["ScriptFunction"] = function(self, Value) HandleAllowJumping(Value) end},
+        ["StaminaPreset"] = {
+            ["DisplayDescription"] = "Select a Stamina Preset",["DisplayTitle"] = "Stamina Preset",["LayoutOrder"] = 8,["Savable"] = true,["InstanceType"] = "StringValue",["DefaultInstanceValue"] = "Original",
+            ["ExtraData"] = {["Requirement"] = "require",["Options"] = "Original|Realistic|Semi-Realistic|Infinite"},
+            ["ScriptFunction"] = function(self, Value) end
+        },
+        ["AntiSlowness"] = {
+            ["DisplayDescription"] = "Removes all types of Slowness Effects",["DisplayTitle"] = "Anti Slowness",["LayoutOrder"] = 9,["Savable"] = true,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = false,["ExtraData"] = {},
+            ["ScriptFunction"] = function(self, Value)
+                if not Value or not SpeedMultipliers then return end
+                for i,Child in SpeedMultipliers:GetChildren() do Check(Child) end
+            end
+        },
+        ["AnimationChanger"] = {
+            ["DisplayDescription"] = "Select a character to override the animations",["DisplayTitle"] = "Animation Changer",["LayoutOrder"] = 10,["Savable"] = false,["InstanceType"] = "StringValue",["DefaultInstanceValue"] = "Original",
+            ["ExtraData"] = {["Requirement"] = "require",["Options"] = "Original|Jason|Slasher|c00lkidd|John Doe|Noli|1x1x1x1|Nosferatu|Azure|!Herobrine|!Brimstone"},
+            ["ScriptFunction"] = function(self, Value)
+                if Value == "Original" then
+                    BindableShouldStop:Fire()
+                else
+                    local Animator = LocalHumanoid and LocalHumanoid:FindFirstChildOfClass("Animator")
+                    if ChangeTrackWithOverride and Animator then
+                        for i,v in Animator:GetPlayingAnimationTracks() do ChangeTrackWithOverride(v,Value,true) end
+                    end
+                end
+            end
+        },
+        ["NoliControl"] = {
+            ["DisplayDescription"] = "Allows you to have better control of Void Rush Ability",["DisplayTitle"] = "Better Void Rush",["LayoutOrder"] = 11,["Savable"] = true,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = false,
+            ["ExtraData"] = {["Requirement"] = "require"},
+            ["ScriptFunction"] = function(self, Value)
+                if NoliConfig then
+                    for _, Entry in {
+                        {Name = "InitialTurnDuration", Value = 0.005, Default = 1.5},
+                        {Name = "TurnSpeed", Value = 10000, Default = 1},
+                        {Name = "InitialTurnMult", Value = 1000, Default = 6.6},
+                    } do
+                        local Key, _, Parent = TableValueFind(NoliConfig, function(i, v) return type(i) == "string" and i:find(Entry.Name) and not i:find(Entry.Name .. "OG") end)
+                        if Key and Parent then
+                            if Value then
+                                Parent[Entry.Name .. "OG"] = Parent[Key]
+                                Parent[Key] = Entry.Value
+                            elseif Parent[Entry.Name .. "OG"] ~= nil then
+                                Parent[Key] = Parent[Entry.Name .. "OG"] or Entry.Default
+                            end
+                        end
+                    end
+                end
+            end
+        },
+        ["ControllableDash"] = {["DisplayDescription"] = "Allows you to control where the dash goes just like Void Rush Ability",["DisplayTitle"] = "Make Coolkidd's Dash Controllable",["LayoutOrder"] = 12,["Savable"] = true,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = false,["ExtraData"] = {},["ScriptFunction"] = function(self, Value) end}
     },
     ["Visuals"] = {
-        ["TabAttributes"] = { ["LayoutOrder"] = 4 },
-        ["ESP"] = { ["DisplayDescription"] = "Master switch for ESP", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) end },
-        ["ESPName"] = { ["DisplayDescription"] = "Shows Player Names", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP" }, ["ScriptFunction"] = function(self, Value) end },
-        ["ESPBox"] = { ["DisplayDescription"] = "Shows 2D Box on Players", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP" }, ["ScriptFunction"] = function(self, Value) end },
-        ["ESPTracer"] = { ["DisplayDescription"] = "Draws line to Players", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP" }, ["ScriptFunction"] = function(self, Value) end },
-        ["DisableNoliNPC"] = { ["DisplayDescription"] = "Removes distracting Noli NPC", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) HandleNoliNPC(Value) end },
-        ["Disable007n7NPC"] = { ["DisplayDescription"] = "Removes distracting 007n7 NPC", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) Handle007n7NPC(Value) end },
-        ["KillersESP"] = { ["DisplayDescription"] = "Highlight Killers", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP" }, ["ScriptFunction"] = function(self, Value) end },
-        ["KillersColor"] = { ["DisplayDescription"] = "Color for Killers", ["InstanceType"] = "StringValue", ["DefaultInstanceValue"] = "Red", ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP|KillersESP", ["Options"] = "Red|Orange|Purple|Gold" }, ["ScriptFunction"] = function(self, Value) end },
-        ["SurvivorsESP"] = { ["DisplayDescription"] = "Highlight Survivors", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP" }, ["ScriptFunction"] = function(self, Value) end },
-        ["SurvivorsColor"] = { ["DisplayDescription"] = "Color for Survivors", ["InstanceType"] = "StringValue", ["DefaultInstanceValue"] = "Green", ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP|SurvivorsESP", ["Options"] = "Green|Orange|Purple|Gold" }, ["ScriptFunction"] = function(self, Value) end },
-        ["GeneratorsESP"] = { ["DisplayDescription"] = "Highlight Generators", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP" }, ["ScriptFunction"] = function(self, Value) end },
-        ["GeneratorsColor"] = { ["DisplayDescription"] = "Color for Generators", ["InstanceType"] = "StringValue", ["DefaultInstanceValue"] = "Cyan", ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP|GeneratorsESP", ["Options"] = "Cyan|Blue|Green|Orange|Purple|Gold" }, ["ScriptFunction"] = function(self, Value) end },
-        ["GeneratorsCheck"] = { ["DisplayDescription"] = "Hide fully repaired generators", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = true, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP|GeneratorsESP" }, ["ScriptFunction"] = function(self, Value) end },
-        ["ItemsESP"] = { ["DisplayDescription"] = "Highlight Items", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP" }, ["ScriptFunction"] = function(self, Value) end },
-        ["ItemsColor"] = { ["DisplayDescription"] = "Color for Items", ["InstanceType"] = "StringValue", ["DefaultInstanceValue"] = "Gold", ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = "ESP|ItemsESP", ["Options"] = "Gold|Cyan|Purple|White" }, ["ScriptFunction"] = function(self, Value) end },
+        ["TabAttributes"] = {["DisplayTitle"] = "Visuals",["LayoutOrder"] = 3},
+        ["DisableNoliNPC"] = {["DisplayDescription"] = "Disables Noli's Distracting NPC",["DisplayTitle"] = "Disable Noli's NPC",["LayoutOrder"] = 1,["Savable"] = true,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = false,["ExtraData"] = {},["ScriptFunction"] = function(self, Value) HandleNoliNPC(Value) end},
+        ["Disable007n7NPC"] = {["DisplayDescription"] = "Disables 007n7's Distracting NPC",["DisplayTitle"] = "Disable 007n7's NPC",["LayoutOrder"] = 1,["Savable"] = true,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = false,["ExtraData"] = {},["ScriptFunction"] = function(self, Value) Handle007n7NPC(Value) end},
+        ["ESP"] = {["DisplayDescription"] = "Track things in the game through walls",["DisplayTitle"] = "ESP",["LayoutOrder"] = 2,["Savable"] = true,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = false,["ExtraData"] = {},["ScriptFunction"] = function(self, Value) end},
+        ["KillersESP"] = {["DisplayDescription"] = "Enables ESP for the killer(s)",["DisplayTitle"] = "Killer(s) (ESP)",["LayoutOrder"] = 3,["Savable"] = true,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = false,["ExtraData"] = {["Requirement"] = "ESP",},["ScriptFunction"] = function(self, Value) end},
+        ["KillersColor"] = {["DisplayDescription"] = "Select a Color for Killer(s) (ESP)",["DisplayTitle"] = "Killer(s) Color",["LayoutOrder"] = 4,["Savable"] = true,["InstanceType"] = "StringValue",["DefaultInstanceValue"] = "Red",["ExtraData"] = {["Requirement"] = "ESP|KillersESP",["Options"] = "Red|Orange|Purple|Gold",},["ScriptFunction"] = function(self, Value) end},
+        ["SurvivorsESP"] = {["DisplayDescription"] = "Enables ESP for the survivor(s)",["DisplayTitle"] = "Survivor(s) (ESP)",["LayoutOrder"] = 6,["Savable"] = true,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = false,["ExtraData"] = {["Requirement"] = "ESP",},["ScriptFunction"] = function(self, Value) end},
+        ["SurvivorsColor"] = {["DisplayDescription"] = "Select a Color for Survivor(s) (ESP)",["DisplayTitle"] = "Survivor(s) Color",["LayoutOrder"] = 7,["Savable"] = true,["InstanceType"] = "StringValue",["DefaultInstanceValue"] = "Green",["ExtraData"] = {["Requirement"] = "ESP|SurvivorsESP",["Options"] = "Green|Orange|Purple|Gold",},["ScriptFunction"] = function(self, Value) end},
+        ["GeneratorsESP"] = {["DisplayDescription"] = "Enables ESP for the Generator(s)",["DisplayTitle"] = "Generator(s) (ESP)",["LayoutOrder"] = 9,["Savable"] = true,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = false,["ExtraData"] = {["Requirement"] = "ESP",},["ScriptFunction"] = function(self, Value) end},
+        ["GeneratorsColor"] = {["DisplayDescription"] = "Select a Color for Generator(s) (ESP)",["DisplayTitle"] = "Generator(s) Color",["LayoutOrder"] = 10,["Savable"] = true,["InstanceType"] = "StringValue",["DefaultInstanceValue"] = "Cyan",["ExtraData"] = {["Requirement"] = "ESP|GeneratorsESP",["Options"] = "Cyan|Blue|Green|Orange|Purple|Gold",},["ScriptFunction"] = function(self, Value) end},
+        ["GeneratorsCheck"] = {["DisplayDescription"] = "Hides Generator(s) That are Completed (ESP)",["DisplayTitle"] = "Hide Completed Generator(s)",["LayoutOrder"] = 11,["Savable"] = true,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = true,["ExtraData"] = {["Requirement"] = "ESP|GeneratorsESP",},["ScriptFunction"] = function(self, Value) end},
+        ["ItemsESP"] = {["DisplayDescription"] = "Enables ESP for the Item(s)",["DisplayTitle"] = "Item(s) (ESP)",["LayoutOrder"] = 12,["Savable"] = true,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = false,["ExtraData"] = {["Requirement"] = "ESP",},["ScriptFunction"] = function(self, Value) end},
+        ["ItemsColor"] = {["DisplayDescription"] = "Select a Color for Item(s) (ESP)",["DisplayTitle"] = "Item(s) Color",["LayoutOrder"] = 13,["Savable"] = true,["InstanceType"] = "StringValue",["DefaultInstanceValue"] = "Gold",["ExtraData"] = {["Requirement"] = "ESP|ItemsESP",["Options"] = "Gold|Cyan|Purple|White",},["ScriptFunction"] = function(self, Value) end},
     },
     ["Miscellaneous"] = {
-         ["TabAttributes"] = { ["LayoutOrder"] = 5 },
-        ["ExtendedFOV"] = { ["DisplayDescription"] = "Extends Field of View", ["InstanceType"] = "NumberValue", ["DefaultInstanceValue"] = PlayerData.Settings.Game.FieldOfView.Value, ["Savable"] = true, ["ExtraData"] = { ["MaxValue"] = 120, ["MinValue"] = 10, ["Step"] = 5 }, ["ScriptFunction"] = function(self, Value) PlayerData.Settings.Game.FieldOfView.Value = Value end },
-        ["ExtendedZoom"] = { ["DisplayDescription"] = "Extends Maximum Zoom Distance", ["InstanceType"] = "NumberValue", ["DefaultInstanceValue"] = 10, ["Savable"] = true, ["ExtraData"] = { ["MaxValue"] = 100, ["MinValue"] = 0, ["Step"] = 5 }, ["ScriptFunction"] = function(self, Value) LocalPlayer.CameraMaxZoomDistance = game:GetService("StarterPlayer").CameraMaxZoomDistance + (Value * 0.25) end },
-        ["ShowChat"] = { ["DisplayDescription"] = "Shows chat while in round", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ExtraData"] = { ["Requirement"] = not game:GetService("Chat"):CanUserChatAsync(LocalPlayer.UserId) and true or nil }, ["ScriptFunction"] = function(self, Value) if TextChatService:FindFirstChildOfClass("ChatWindowConfiguration") then TextChatService:FindFirstChildOfClass("ChatWindowConfiguration").Enabled = Value end end },
-        ["ShowPrivacy"] = { ["DisplayDescription"] = "Reveal privacy info of others", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) for i,v in pairs(Players:GetPlayers()) do if v ~= LocalPlayer then HandlePrivacySettings(v) end end end },
-        ["HideInjury"] = { ["DisplayDescription"] = "Hide low health red screen", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = true, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) for i,v in pairs(PlayerGui:FindFirstChild("TemporaryUI"):QueryDescendants("#redFlash,#injuredVignette")) do v.Visible = not Value end if game:GetService("Lighting"):FindFirstChild("HealthDesaturation") then game:GetService("Lighting"):FindFirstChild("HealthDesaturation").Enabled = not Value end end },
-        ["DeleteRagdolls"] = { ["DisplayDescription"] = "Delete dead bodies for FPS", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["Savable"] = true, ["ScriptFunction"] = function(self, Value) if workspace:FindFirstChild("Ragdolls") and Value then workspace:FindFirstChild("Ragdolls"):ClearAllChildren() end end },
-        ["CrashTarget"] = { ["DisplayDescription"] = "Crash target (Host Only)", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["ScriptFunction"] = function(self, Value) if Value then self.Instance.Value = false repeat Network:WaitForChild("RemoteEvent"):FireServer("ExecuteCommand", {"GiveStatus", "All", "Nausea", math.huge, 1}) task.wait(1.5) until false end end },
-        ["SkyGlitch"] = { ["DisplayDescription"] = "Glitch sky (Host Only)", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["ScriptFunction"] = function(self, Value) if Value then self.Instance.Value = false Network:WaitForChild("RemoteEvent"):FireServer("ExecuteCommand", {"GiveStatus", "All", "Nausea", -1e11, 10}) end end },
-         ["InstantKill"] = { ["DisplayDescription"] = "Instakill others (Host Only)", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["ScriptFunction"] = function(self, Value) if workspace:GetAttribute("InstaKill") == nil then workspace:SetAttribute("InstaKill", Value) self.Instance.Value = Value task.delay(1.5, function() workspace:SetAttribute("InstaKill",nil) end) if Value then repeat Network:WaitForChild("RemoteEvent"):FireServer("ExecuteCommand", {"GiveStatus", game.Players.LocalPlayer.Name, "Strength", 99999, 1}) task.wait(0.5) until not self.Instance.Value end else self.Instance.Value = workspace:GetAttribute("InstaKill") end end },
-        ["Rejoin"] = { ["DisplayDescription"] = "Rejoin the server", ["InstanceType"] = "BoolValue", ["DefaultInstanceValue"] = false, ["ScriptFunction"] = function(self, Value) if Value then pcall(function() game:GetService("TeleportService"):Teleport(game.PlaceId, LocalPlayer) end) end end },
-    },
-    ["Information"] = { ["TabAttributes"] = { ["LayoutOrder"] = 6 } }
+        ["TabAttributes"] = {["DisplayTitle"] = "Miscellaneous",["LayoutOrder"] = 4},
+        ["ExtendedFOV"] = {
+            ["DisplayDescription"] = "A extended version of the FOV inside the normal settings",["DisplayTitle"] = "Extended FOV",["LayoutOrder"] = 1,["Savable"] = true,["InstanceType"] = "NumberValue",
+            ["DefaultInstanceValue"] = PlayerData and PlayerData:FindFirstChild("Settings") and PlayerData.Settings.Game.FieldOfView.Value or 70,
+            ["ExtraData"] = {["MaxValue"] = 120,["MinValue"] = 10,["Step"] = 5,},
+            ["ScriptFunction"] = function(self, Value)
+                if PlayerData and PlayerData:FindFirstChild("Settings") then PlayerData.Settings.Game.FieldOfView.Value = Value end
+                workspace.CurrentCamera.FieldOfView = Value
+            end
+        },
+        ["ExtendedZoom"] = {
+            ["DisplayDescription"] = "Extends the Maximum Zoom Distance for the camera",["DisplayTitle"] = "Extended Zoom Distance",["LayoutOrder"] = 2,["Savable"] = true,["InstanceType"] = "NumberValue",["DefaultInstanceValue"] = 10,
+            ["ExtraData"] = {["MaxValue"] = 100,["MinValue"] = 0,["Step"] = 5,},
+            ["ScriptFunction"] = function(self, Value) LocalPlayer.CameraMaxZoomDistance = game:GetService("StarterPlayer").CameraMaxZoomDistance + (Value * 0.25) end
+        },
+        ["ShowChat"] = {
+            ["DisplayDescription"] = "Shows the Full Chat while in the Round",["DisplayTitle"] = "Show Chat",["LayoutOrder"] = 3,["Savable"] = true,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = false,
+            ["ExtraData"] = {["Requirement"] = not game:GetService("Chat"):CanUserChatAsync(LocalPlayer.UserId) and true or nil},
+            ["ScriptFunction"] = function(self, Value)
+                if TextChatService:FindFirstChildOfClass("ChatWindowConfiguration") then TextChatService:FindFirstChildOfClass("ChatWindowConfiguration").Enabled = Value end
+            end
+        },
+        ["ShowPrivacy"] = {
+            ["DisplayDescription"] = "Shows everyones privacy info",["DisplayTitle"] = "Shows Privacy Info",["LayoutOrder"] = 4,["Savable"] = true,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = false,["ExtraData"] = {},
+            ["ScriptFunction"] = function(self, Value) for i,v in Players:GetPlayers() do if v ~= LocalPlayer then HandlePrivacySettings(v) end end end
+        },
+        ["HideInjury"] = {
+            ["DisplayDescription"] = "Hides the injured screen and effects used when you are low health",["DisplayTitle"] = "Hide Injured UI/Effects",["LayoutOrder"] = 5,["Savable"] = true,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = true,["ExtraData"] = {},
+            ["ScriptFunction"] = function(self, Value)
+                if PlayerGui:FindFirstChild("TemporaryUI") then
+                    for i,v in PlayerGui:FindFirstChild("TemporaryUI"):QueryDescendants("#redFlash,#injuredVignette") do v.Visible = not Value end
+                end
+                if game:GetService("Lighting"):FindFirstChild("HealthDesaturation") then game:GetService("Lighting"):FindFirstChild("HealthDesaturation").Enabled = not Value end
+            end
+        },
+        ["DeleteRagdolls"] = {
+            ["DisplayDescription"] = "Deletes ALL Ragdolls regardless the type of ragdoll for performance",["DisplayTitle"] = "Delete All Ragdolls",["LayoutOrder"] = 6,["Savable"] = true,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = false,
+            ["ExtraData"] = {["Requirement"] = "PrivateServer"},
+            ["ScriptFunction"] = function(self, Value) if workspace:FindFirstChild("Ragdolls") and Value then workspace:FindFirstChild("Ragdolls"):ClearAllChildren() end end
+        },
+        ["PlayerSelectCrash"] = {["DisplayDescription"] = "Select a player to crash",["DisplayTitle"] = "Player to crash",["LayoutOrder"] = 8,["Savable"] = false,["InstanceType"] = "StringValue",["DefaultInstanceValue"] = "None",["ExtraData"] = {["Requirement"] = "PrivateServerOwner",["Options"] = "None",},["ScriptFunction"] = function(self, Value) end},
+        ["CrashTheTarget"] = {
+            ["DisplayDescription"] = "Crashes the selected target (Host Exclusive)",["DisplayTitle"] = "Crash Target",["LayoutOrder"] = 9,["Savable"] = false,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = false,
+            ["ExtraData"] = {["Requirement"] = "PlayerSelectCrash~None|PrivateServerOwner",},
+            ["ScriptFunction"] = function(self, Value)
+                if Value then
+                    if self.Instance then self.Instance.Value = false end
+                    local PlayerName = FeatureLoadout["Miscellaneous"]["PlayerSelectCrash"]["Instance"].Value
+                    if PlayerName == "Everyone" or PlayerName == "Both" then
+                        for i,Player in Players:GetPlayers() do
+                            if Player ~= LocalPlayer then
+                                local Name = Player.Name
+                                task.spawn(function()
+                                    repeat Network:WaitForChild("RemoteEvent"):FireServer("ExecuteCommand", {"GiveStatus", Name, "Nausea", math.huge, 1}); task.wait(1.5) until not Players:FindFirstChild(Name)
+                                end)
+                            end
+                        end
+                    else
+                        task.spawn(function()
+                            repeat Network:WaitForChild("RemoteEvent"):FireServer("ExecuteCommand", {"GiveStatus", PlayerName, "Nausea", math.huge, 1}); task.wait(1.5) until not Players:FindFirstChild(PlayerName)
+                        end)
+                    end
+                end
+            end
+        },
+        ["SkyGlitch"] = {
+            ["DisplayDescription"] = "Gives sky glitching effect to everyone (Host Exclusive)",["DisplayTitle"] = "Sky Glitch",["LayoutOrder"] = 10,["Savable"] = false,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = false,
+            ["ExtraData"] = {["Requirement"] = "PrivateServerOwner"},
+            ["ScriptFunction"] = function(self, Value)
+                if Value and not workspace:GetAttribute("EffectActive") then
+                    workspace:SetAttribute("EffectActive",true)
+                    if self.Instance then self.Instance.Value = false end
+                    Network:WaitForChild("RemoteEvent"):FireServer("ExecuteCommand", {"GiveStatus", "All", "Nausea", -1e11, 10})
+                    task.delay(10, function() workspace:SetAttribute("EffectActive",nil); if self.Instance then self.Instance.Value = false end end)
+                elseif workspace:GetAttribute("EffectActive") and self.Instance then
+                    self.Instance.Value = true
+                end
+            end
+        },
+        ["InstaKill"] = {
+            ["DisplayDescription"] = "Allows you to instantly kill anyone (Host Exclusive)",["DisplayTitle"] = "Instant Kill",["LayoutOrder"] = 11,["Savable"] = false,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = false,
+            ["ExtraData"] = {["Requirement"] = "PrivateServerOwner"},
+            ["ScriptFunction"] = function(self, Value)
+                 if workspace:GetAttribute("InstaKill") == nil then
+                    workspace:SetAttribute("InstaKill", Value)
+                    if self.Instance then self.Instance.Value = Value end
+                    task.delay(1.5, function() workspace:SetAttribute("InstaKill",nil) end)
+                    if Value then
+                        repeat
+                            Network:WaitForChild("RemoteEvent"):FireServer("ExecuteCommand", {"GiveStatus", game.Players.LocalPlayer.Name, "Strength", 99999, 1})
+                            task.wait(0.5)
+                        until not self.Instance.Value
+                    end
+                elseif self.Instance then
+                    self.Instance.Value = workspace:GetAttribute("InstaKill")
+                end
+            end
+        },
+        ["OfficialJoin"] = {
+            ["DisplayDescription"] = "Makes you join the official forsaken game",["DisplayTitle"] = "Join the official version",["LayoutOrder"] = 14,["Savable"] = false,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = false,
+            ["ExtraData"] = {["Requirement"] = "OfficialGame~true"},
+            ["ScriptFunction"] = function(self, Value)
+                if Value and not workspace:GetAttribute("LoadingTeleport") then
+                    workspace:SetAttribute("LoadingTeleport",true)
+                    if workspace:FindFirstChild("Sounds") then workspace.Sounds:ClearAllChildren() end
+                    if workspace:FindFirstChild("Themes") then workspace.Themes:ClearAllChildren() end
+                    PlaySound("deadJOutIaw_Nova",{["TimePosition"] = 0.4})
+                    task.wait(0.5)
+                    game:GetService("ExperienceService"):LaunchExperience({placeId = 83645629621104})
+                elseif workspace:GetAttribute("LoadingTeleport") and self.Instance then
+                    self.Instance.Value = true
+                end
+            end
+        },
+        ["Rejoin"] = {
+            ["DisplayDescription"] = "Makes you rejoin the exact same server",["DisplayTitle"] = "Rejoin",["LayoutOrder"] = 15,["Savable"] = false,["InstanceType"] = "BoolValue",["DefaultInstanceValue"] = false,["ExtraData"] = {},
+            ["ScriptFunction"] = function(self, Value)
+                if Value and not workspace:GetAttribute("LoadingTeleport") then
+                    workspace:SetAttribute("LoadingTeleport",true)
+                    if workspace:FindFirstChild("Sounds") then workspace.Sounds:ClearAllChildren() end
+                    if workspace:FindFirstChild("Themes") then workspace.Themes:ClearAllChildren() end
+                    PlaySound("deadJOutIaw_Nova",{["TimePosition"] = 0.4})
+                    task.wait(0.25)
+                    if workspace:GetAttribute("ServerType") == "VIP" then game:GetService("TeleportService"):Teleport(game.PlaceId)
+                    else game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId,game.JobId) end
+                elseif workspace:GetAttribute("LoadingTeleport") and self.Instance then
+                    self.Instance.Value = true
+                end
+            end
+        },
+    }
 }
 
--- Database Init Sync Tanpa Bug Kosong --
-PlusFolderSettings.Name = "Plus"
-PlusFolderSettings.Parent = PlayerData
-
-local function ReturnData(Path, WithFolder)
-	if WithFolder == false then if isfile(Path) ~= false then return readfile(Path) end
-	else if isfile("PradaxcaScript/ForsakenPlus/" .. Path) ~= false then return readfile("PradaxcaScript/ForsakenPlus/" .. Path) end return nil end
-end
-
-local function ChangeData(Path, Option, WithFolder)
-	if WithFolder == false then if isfile(Path) ~= false then writefile(Path,Option) end
-	else if isfile("PradaxcaScript/ForsakenPlus/" .. Path) ~= false then writefile("PradaxcaScript/ForsakenPlus/" .. Path, Option) end end
-end
-
-local TableData = {}
-pcall(function()
-    local decoded = HttpService:JSONDecode(ReturnData("Data.txt", true))
-    if decoded and type(decoded) == "table" then TableData = decoded end
-end)
-
-for TabName, TabContents in pairs(FeatureLoadout) do
-    local Folder = Instance.new("Folder")
-    Folder.Name = TabName
-    Folder.Parent = PlusFolderSettings
-    if TabContents["TabAttributes"] then for Attribute, Value in pairs(TabContents["TabAttributes"]) do Folder:SetAttribute(Attribute, Value) end end
-    
-    for SettingName, SettingData in pairs(TabContents) do
-        if SettingName ~= "TabAttributes" then
-            local NewInstance = Instance.new(SettingData.InstanceType)
-            NewInstance.Name = SettingName
-            
-            -- AMAN: SEMUA FITUR CHEAT DEFAULT MATI
-            local isSystem = (TabName == "Hacks" or TabName == "Settings")
-            local defaultVal = SettingData.DefaultInstanceValue
-            if not isSystem and SettingData.InstanceType == "BoolValue" then
-                defaultVal = false
-            end
-            
-            NewInstance.Value = defaultVal
-            
-            if SettingData["Savable"] and FeatureLoadout["Hacks"]["files"]["DefaultInstanceValue"] then
-                if TableData[SettingName] ~= nil and (not SettingData.ExtraData or SettingData.ExtraData.Requirement ~= true) then
-                    NewInstance.Value = TableData[SettingName]
-                end
-                NewInstance:GetPropertyChangedSignal("Value"):Connect(function()
-                    if NewInstance:GetAttribute("Requirement") == true then return end
-                    local TableData2 = {}
-                    pcall(function() TableData2 = HttpService:JSONDecode(ReturnData("Data.txt", true)) or {} end)
-                    TableData2[SettingName] = SettingData.DefaultInstanceValue ~= NewInstance.Value and NewInstance.Value or nil
-                    pcall(function() ChangeData("Data.txt", HttpService:JSONEncode(TableData2), true) end)
-                end)
-            end
-            NewInstance:SetAttribute("LayoutOrder", SettingData.LayoutOrder or 99)
-            NewInstance:SetAttribute("DisplayDescription", SettingData.DisplayDescription or "")
-            if SettingData.ExtraData then for ExtraDataIndex, ExtraDataValue in pairs(SettingData.ExtraData) do NewInstance:SetAttribute(ExtraDataIndex, ExtraDataValue) end end
-            
-            FeatureLoadout[TabName][SettingName]["Instance"] = NewInstance
-            NewInstance.Parent = Folder
-        end
-    end
-end
-
-function ColoredPrint(Text, Icon, Color)
-    task.spawn(function()
-        local UniqueID = string.sub(game:GetService("HttpService"):GenerateGUID(false), 1, 7)
-        print("[Pradaxca Plus]: " .. tostring(Text) .. " | " .. UniqueID)
-    end)
-end
+-- Functions --
+function ColoredPrint(Text, Icon, Color) print("[ForsakenPlus] " .. tostring(Text)) end
 
 function PlaySound(SoundName,Settings,KeepPlaying)
     local Sound = typeof(SoundName) == "string" and game:GetService("ReplicatedStorage").Assets.Sounds:FindFirstChild(SoundName,true) or (typeof(SoundName) == "Instance" and SoundName) or nil
@@ -275,11 +374,13 @@ function PlaySound(SoundName,Settings,KeepPlaying)
         task.spawn(function()
             Sound = Sound:Clone()
             Sound.Parent = workspace:FindFirstChild("Sounds") or workspace
-            if type(Settings) == "table" then for i,v in pairs(Settings) do Sound[i] = v end end
+            if type(Settings) == "table" then for i,v in Settings do Sound[i] = v end end
             if KeepPlaying then Sound.Playing = true else Sound:Play() end
             Debris:AddItem(Sound, Sound.TimeLength + 1)
             return Sound
         end)
+    else
+        warn("Failed to play sound: ".. tostring(SoundName))
     end
 end
 
@@ -290,25 +391,23 @@ function GetValue(FeatureName)
 end
 
 local function GetFunction(...)
-    for i,v in pairs(table.pack(...)) do if v and typeof(v) == "function" then return v end end return nil
+    for i,v in table.pack(...) do if v and typeof(v) == "function" then return v end end
+    return nil
 end
 
--- ESP LOGIC FUNCTIONS --
+function RichTextGradientColor(Text:string,Colors) return Text end
+
 local function CheckDistance(Highlight, TargetRoot, Settings)
     if workspace.CurrentCamera and TargetRoot then
-         local Distance = (workspace.CurrentCamera.CFrame.Position - TargetRoot.Position).Magnitude
+        local Distance = (workspace.CurrentCamera.CFrame.Position - TargetRoot.Position).Magnitude
         if Distance>1200 then Distance = 0 end
         if Distance >= Settings["MinDistance"] then
             local TransparencyAmount = math.clamp(1 - math.clamp((Distance - Settings["MinDistance"]) / (Settings["MaxDistance"] - Settings["MinDistance"]), 0, 1), 0.45, 1)
-            local Tween = TweenService:Create(Highlight, TweenInfo.new(0.1), {FillTransparency = TransparencyAmount + 0.05, OutlineTransparency = TransparencyAmount <= 0.95 and TransparencyAmount - 0.05 or TransparencyAmount})
-            Tween.Parent = Highlight
-            Tween:Play()
-            Debris:AddItem(Tween, 0.1)
+            Highlight.FillTransparency = TransparencyAmount + 0.05
+            Highlight.OutlineTransparency = TransparencyAmount <= 0.95 and TransparencyAmount - 0.05 or TransparencyAmount
         else
-            local Tween = TweenService:Create(Highlight, TweenInfo.new(0.1), {FillTransparency = 1, OutlineTransparency = 1})
-            Tween.Parent = Highlight
-            Tween:Play()
-            Debris:AddItem(Tween, 0.1)
+            Highlight.FillTransparency = 1
+            Highlight.OutlineTransparency = 1
         end
     end
 end
@@ -319,132 +418,60 @@ local function CreateDynamicHighlight(Enabled,ItemInstance,TargetRoot,Settings)
     if Enabled and GetValue("ESP") then
         if not Highlight[1] then
             Highlight = Instance.new("Highlight")
-             Highlight.Name = HttpService:GenerateGUID(false)
+            Highlight.Name = HttpService:GenerateGUID(false)
             local H, S, V = Settings.Color:ToHSV()
             Highlight.FillColor = Color3.fromHSV(H, S, V * 0.8)
             Highlight.OutlineColor = Color3.fromHSV(H, S, V * 1.1)
             Highlight:SetAttribute("Dynamic",true)
             Highlight.Parent = ItemInstance
             Highlight.Adornee = ItemInstance
-             Highlight.FillTransparency = 1
+            Highlight.FillTransparency = 1
             Highlight.OutlineTransparency = 1
             CheckDistance(Highlight, TargetRoot, Settings)
         else
             Highlight = Highlight[1]
             local H, S, V = Settings.Color:ToHSV()
             Highlight.FillColor = Color3.fromHSV(H, S, V * 0.8)
-             Highlight.OutlineColor = Color3.fromHSV(H, S, V * 1.1)
+            Highlight.OutlineColor = Color3.fromHSV(H, S, V * 1.1)
             CheckDistance(Highlight, TargetRoot, Settings)
         end
-    elseif Highlight[1] then Highlight[1]:Destroy() end
-end
-
-local function UpdateCustomESP(Character, Enabled, Settings)
-    local Root = Character:FindFirstChild("HumanoidRootPart")
-    if not Root then return end
-
-    local espFolder = Character:FindFirstChild("CustomESPFolder")
-    if not Enabled then
-        if espFolder then espFolder:Destroy() end
-        return
-    end
-    if not espFolder then
-        espFolder = Instance.new("Folder")
-        espFolder.Name = "CustomESPFolder"
-        espFolder.Parent = Character
-    end
-
-    local nameESP = espFolder:FindFirstChild("NameESP")
-    if GetValue("ESPName") then
-        if not nameESP then
-            nameESP = Instance.new("BillboardGui")
-            nameESP.Name = "NameESP"
-            nameESP.Size = UDim2.new(0, 200, 0, 50)
-            nameESP.StudsOffset = Vector3.new(0, 3.5, 0)
-            nameESP.AlwaysOnTop = true
-            nameESP.Parent = espFolder
-            nameESP.Adornee = Root
-             local text = Instance.new("TextLabel")
-            text.Name = "TextLabel"
-            text.Size = UDim2.new(1, 0, 1, 0)
-            text.BackgroundTransparency = 1
-            text.Text = Character.Name
-            text.Font = Enum.Font.GothamBold
-            text.TextSize = 13
-            text.TextStrokeTransparency = 0.2
-            text.Parent = nameESP
-        end
-        nameESP.TextLabel.TextColor3 = Settings.Color
-    else
-        if nameESP then nameESP:Destroy() end
-    end
-
-    local boxESP = espFolder:FindFirstChild("BoxESP")
-    if GetValue("ESPBox") then
-        if not boxESP then
-            boxESP = Instance.new("BillboardGui")
-            boxESP.Name = "BoxESP"
-            boxESP.Size = UDim2.new(4.5, 0, 6, 0)
-            boxESP.AlwaysOnTop = true
-            boxESP.Parent = espFolder
-            boxESP.Adornee = Root
-            local frame = Instance.new("Frame")
-            frame.Size = UDim2.new(1, 0, 1, 0)
-            frame.BackgroundTransparency = 1
-            frame.BorderSizePixel = 0
-            frame.Parent = boxESP
-            local stroke = Instance.new("UIStroke")
-            stroke.Thickness = 2
-            stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-            stroke.Parent = frame
-        end
-        boxESP.Frame.UIStroke.Color = Settings.Color
-    else
-        if boxESP then boxESP:Destroy() end
-    end
-
-    local tracerESP = espFolder:FindFirstChild("TracerESP")
-    local localRoot = LocalCharacter and LocalCharacter:FindFirstChild("HumanoidRootPart")
-    if GetValue("ESPTracer") and localRoot then
-        if not tracerESP then
-            tracerESP = Instance.new("Beam")
-            tracerESP.Name = "TracerESP"
-            tracerESP.FaceCamera = true
-            tracerESP.Width0 = 0.05
-            tracerESP.Width1 = 0.05
-            tracerESP.Transparency = NumberSequence.new(0.2)
-            tracerESP.Parent = espFolder
-                 local att0 = localRoot:FindFirstChild("TracerAtt") or Instance.new("Attachment", localRoot)
-            att0.Name = "TracerAtt"
-            local att1 = Root:FindFirstChild("TracerAtt") or Instance.new("Attachment", Root)
-            att1.Name = "TracerAtt"
-            tracerESP.Attachment0 = att0
-            tracerESP.Attachment1 = att1
-         end
-        tracerESP.Color = ColorSequence.new(Settings.Color)
-    else
-        if tracerESP then tracerESP:Destroy() end
+    elseif Highlight[1] then
+        Highlight[1]:Destroy()
     end
 end
 
--- Helper & Exploit Functions --
+local function UpdatePlayerCrashDrop()
+    local OriginString = "None"
+    for i,v in Players:GetPlayers() do
+        if v ~= LocalPlayer then OriginString = OriginString .. "|" .. v.Name end
+    end
+    if #Players:GetPlayers() == 3 then OriginString = OriginString .. "|Both"
+    elseif #Players:GetPlayers() > 3 then OriginString = OriginString .. "|Everyone" end
+    if FeatureLoadout["Miscellaneous"]["PlayerSelectCrash"]["Instance"] then
+        FeatureLoadout["Miscellaneous"]["PlayerSelectCrash"]["Instance"]:SetAttribute("Options", OriginString)
+    end
+end
+
 function HandlePrivacySettings(Player)
     if Player then
         local pData = Player:FindFirstChild("PlayerData")
         if pData then
-           local PrivacySettings = pData:FindFirstChild("Privacy",true)
+            local PrivacySettings = pData:FindFirstChild("Privacy",true)
             if PrivacySettings then
-                for i,v in pairs(PrivacySettings:GetChildren()) do
+                for i,v in PrivacySettings:GetChildren() do
                     if not v:GetAttribute("OriginalValue") and v:IsA("BoolValue") then
                         v:SetAttribute("OriginalValue", v.Value)
                         v:GetPropertyChangedSignal("Value"):Connect(function()
-                                 if GetValue("ShowPrivacy") then v.Value = false else v.Value = v:GetAttribute("OriginalValue") end
+                            if FeatureLoadout["Miscellaneous"]["ShowPrivacy"]["Instance"] and FeatureLoadout["Miscellaneous"]["ShowPrivacy"]["Instance"].Value then v.Value = false
+                            else v.Value = v:GetAttribute("OriginalValue") end
                         end)
-                        if GetValue("ShowPrivacy") then v.Value = false else v.Value = v:GetAttribute("OriginalValue") end
+                        if FeatureLoadout["Miscellaneous"]["ShowPrivacy"]["Instance"] and FeatureLoadout["Miscellaneous"]["ShowPrivacy"]["Instance"].Value then v.Value = false
+                        else v.Value = v:GetAttribute("OriginalValue") end
                     elseif v:IsA("BoolValue") then
-                        if GetValue("ShowPrivacy") then v.Value = false else v.Value = v:GetAttribute("OriginalValue") end
+                        if FeatureLoadout["Miscellaneous"]["ShowPrivacy"]["Instance"] and FeatureLoadout["Miscellaneous"]["ShowPrivacy"]["Instance"].Value then v.Value = false
+                        else v.Value = v:GetAttribute("OriginalValue") end
                     end
-                 end
+                end
             end
         end
     end
@@ -453,20 +480,25 @@ end
 function HandleAllowJumping(Value)
     if LocalHumanoid and not LocalHumanoid:GetAttribute("JumpingConnection") then
         if Value then
-            if not LocalHumanoid:GetAttribute("JumpingConnection") then LocalHumanoid:SetAttribute("JumpingConnection",LocalHumanoid.JumpPower) else return end
+            if not LocalHumanoid:GetAttribute("JumpingConnection") then LocalHumanoid:SetAttribute("JumpingConnection",LocalHumanoid.JumpPower)
+            else return end
             local Connection;Connection = LocalHumanoid.StateChanged:Connect(function(old,new)
-                if LocalCharacter.Parent ~= "Spectator" and new == Enum.HumanoidStateType.Jumping or new == Enum.HumanoidStateType.Freefall and LocalHumanoid.JumpPower > 0 and (GetValue("EnableJumping") or false) then
-                    if not(GetValue("EnableJumping")) then
-                         Connection:Disconnect()
+                if LocalCharacter.Parent ~= "Spectator" and new == Enum.HumanoidStateType.Jumping or new == Enum.HumanoidStateType.Freefall and LocalHumanoid.JumpPower > 0 and ((FeatureLoadout["Features"]["EnableJumping"]["Instance"] and FeatureLoadout["Features"]["EnableJumping"]["Instance"].Value) or false) then
+                    if not(FeatureLoadout["Features"]["EnableJumping"]["Instance"].Value) then
+                        Connection:Disconnect()
                         LocalHumanoid.JumpPower = LocalHumanoid:GetAttribute("JumpingConnection") or 0
                         LocalHumanoid:SetAttribute("JumpingConnection",nil)
                         return
-                     end
+                    end
                     task.spawn(function() task.wait(0.067) LocalHumanoid.JumpPower = 0 end)
                     task.wait(1.5)
-                    if GetValue("EnableJumping") then LocalHumanoid.JumpPower = 47
-                    else Connection:Disconnect() LocalHumanoid.JumpPower = LocalHumanoid:GetAttribute("JumpingConnection") or 0 LocalHumanoid:SetAttribute("JumpingConnection",nil) end
-                 end
+                    if FeatureLoadout["Features"]["EnableJumping"]["Instance"].Value then LocalHumanoid.JumpPower = 47
+                    else
+                        Connection:Disconnect()
+                        LocalHumanoid.JumpPower = LocalHumanoid:GetAttribute("JumpingConnection") or 0
+                        LocalHumanoid:SetAttribute("JumpingConnection",nil)
+                    end
+                end
             end)
         end
         LocalHumanoid.JumpPower = Value and 47 or 0
@@ -475,23 +507,33 @@ end
 
 function HandleNoliNPC(Value)
     if Value then
-        for i,v in pairs(workspace.Players.Killers:GetChildren()) do
-            if v.Name:lower() == "noli" and not Players:GetPlayerFromCharacter(v) then v.Parent = Lighting v:PivotTo(v:GetPivot() * CFrame.new(0,-100,0)) end
+        for i,v in workspace.Players.Killers:GetChildren() do
+            if v.Name:lower() == "noli" and not Players:GetPlayerFromCharacter(v) then
+                v.Parent = Lighting
+                v:PivotTo(v:GetPivot() * CFrame.new(0,-100,0))
+            end
         end
         if workspace:FindFirstChild("Themes") then
-            for i,v in pairs(workspace.Themes:GetChildren()) do if v.Name:find("FakeLayer") and v:IsA("Sound") then v:Destroy() end end
+            for i,v in pairs(workspace.Themes:GetChildren()) do
+                if v.Name:find("FakeLayer") and v:IsA("Sound") then v:Destroy() end
+            end
         end
     else
-        for i,v in pairs(Lighting:GetChildren()) do if v.Name:lower() == "noli" then v.Parent = InGame v:PivotTo(v:GetPivot() * CFrame.new(0,100,0)) end end
+        for i,v in Lighting:GetChildren() do
+            if v.Name:lower() == "noli" then
+                v.Parent = InGame
+                v:PivotTo(v:GetPivot() * CFrame.new(0,100,0))
+            end
+        end
     end
 end
 
 function Handle007n7NPC(Value)
     if Value then
-        for i,v in pairs(InGame:GetChildren()) do
+        for i,v in InGame:GetChildren() do
             if v.Name:lower() == "007n7" and not Players:GetPlayerFromCharacter(v) then
                 v.Parent = Lighting
-                 if v:FindFirstChild("HumanoidRootPart") then
+                if v:FindFirstChild("HumanoidRootPart") then
                     v:FindFirstChild("HumanoidRootPart").ChildAdded:Connect(function(Child)
                         if Child:IsA("Sound") and GetValue("Disable007n7NPC") then Child:Destroy() end
                     end)
@@ -499,7 +541,9 @@ function Handle007n7NPC(Value)
             end
         end
     else
-        for i,v in pairs(Lighting:GetChildren()) do if v.Name:lower() == "007n7" then v.Parent = InGame end end
+        for i,v in Lighting:GetChildren() do
+            if v.Name:lower() == "007n7" then v.Parent = InGame end
+        end
     end
 end
 
@@ -510,7 +554,18 @@ function IsHitboxNotNear(HitboxPart,Position)
         Params.FilterDescendantsInstances = {HitboxPart}
         Params.MaxParts = 1
         local Result = workspace:GetPartBoundsInRadius(Position, 3, Params)
-         return #Result == 0
+        return #Result == 0
+    else return false end
+end
+
+function IsPoisonOnPosition(Position)
+    if GameMap and GameMap:FindFirstChild("ToxicWater") then
+        local Params = OverlapParams.new()
+        Params.FilterType = Enum.RaycastFilterType.Include
+        Params.FilterDescendantsInstances = {GameMap.ToxicWater}
+        Params.MaxParts = 1
+        local Result = workspace:GetPartBoundsInRadius(Position, 6.7, Params)
+        return #Result > 0
     else return false end
 end
 
@@ -521,7 +576,7 @@ function GoUnder(Value)
         Value = GetValue("Invincible")
     end
     if Value and not IsUnderground then
-         IsUnderground = false
+        IsUnderground = false
         repeat task.wait() until (LocalRoot and LocalHead and LocalHumanoid)
         task.wait(0.25)
         local OldCFrame = LocalRoot.CFrame
@@ -536,7 +591,7 @@ function GoUnder(Value)
             LocalRoot.CFrame = OldCFrame * CFrame.new(0, -Offset, 0)
             LocalHead.Anchored = true
             repeat task.wait(0.02) until IsHitboxNotNear(LocalCharacter:FindFirstChild("QueryHitbox"),OldCFrame.Position) or not LocalRoot or not LocalCharacter or TimerStop < workspace.DistributedGameTime
-             IsUnderground = true
+            IsUnderground = true
             task.wait(0.02)
             LocalHead.Anchored = false
             LocalRoot.CFrame = OldCFrame
@@ -544,23 +599,27 @@ function GoUnder(Value)
         if Tries >= 3 then
             IsUnderground = false
             workspace:SetAttribute("Invincible",nil)
-             FeatureLoadout["Features"]["Invincible"]["Instance"].Value = false
+            FeatureLoadout["Features"]["Invincible"]["Instance"].Value = false
             task.wait(0.03)
             LocalHumanoid.CameraOffset = Vector3.new(0, 0, 0)
-            return ColoredPrint("Failed to go invincible! Tried 3 Times and still failed.", "info", Color3.new(1,0.25,0))
+            return
         end
         task.wait(0.1)
         LocalHumanoid.CameraOffset = Vector3.new(0, 0, 0)
-    else IsUnderground = false end
+    else
+        IsUnderground = false
+    end
 end
 
 function Check(ValueInstance)
     if GetValue("AntiSlowness") then
         if ValueInstance then
             if ValueInstance.Name == "DirectionalMovement" or ValueInstance.Name == "FixingGenerator" then
-                 if ValueInstance.Value < 1 then ValueInstance.Value = 1 end
-            elseif ValueInstance.Value > 0.05 and ValueInstance.Value < 1 then ValueInstance:Destroy() end
-         end
+                if ValueInstance.Value < 1 then ValueInstance.Value = 1 end
+            elseif ValueInstance.Value > 0.05 and ValueInstance.Value < 1 then
+                ValueInstance:Destroy()
+            end
+        end
     end
 end
 
@@ -569,7 +628,7 @@ function TableValueFind(Table, MatchFn, Seen)
     Seen = Seen or {}
     if Seen[Table] then return nil end
     Seen[Table] = true
-    for Key, Value in pairs(Table) do
+    for Key, Value in Table do
         if MatchFn(Key, Value) then return Key, Value, Table
         elseif type(Value) == "table" then
             local FoundKey, FoundValue, FoundParent = TableValueFind(Value, MatchFn, Seen)
@@ -580,10 +639,10 @@ function TableValueFind(Table, MatchFn, Seen)
 end
 
 local function GetAnimationType(ID)
-    for i,v in pairs(AllAnimations) do
-        for animtype,animId in pairs(v) do
+    for i,v in AllAnimations do
+        for animtype,animId in v do
             if type(animId) == "table" then
-                for i2,v2 in pairs(animId) do
+                for i2,v2 in animId do
                     if type(v2) == "string" and v2:find(tostring(ID)) then return animtype,i end
                 end
             else
@@ -596,8 +655,7 @@ end
 local function AddOverridenAnimation(ID)
     if LocalCharacter and ID then
         if OverriddenAnimations[ID] then return table.unpack(OverriddenAnimations[ID]) end
-        local Animator = LocalHumanoid and LocalHumanoid:FindFirstChildOfClass("Animator")
-         local OverrideFolder = LocalCharacter:FindFirstChild("OverrideAnimation") or Instance.new("Folder", LocalCharacter)
+        local OverrideFolder = LocalCharacter:FindFirstChild("OverrideAnimation") or Instance.new("Folder", LocalCharacter)
         OverrideFolder.Name = "OverrideAnimation"
         local AnimType = GetAnimationType(ID) or "Unknown"
         local Animation = Instance.new("Animation")
@@ -617,7 +675,6 @@ end
 function ChangeTrackWithOverride(Track,AnimationName,SkipOverride)
     if Track and LocalHumanoid then
         AnimationName = AnimationName:gsub(" ","")
-         local Animator = LocalHumanoid:FindFirstChildOfClass("Animator")
         local IsOverridenTrack = Track.Animation and Track.Animation:GetAttribute("Overriden")
         local AnimType,CharName = GetAnimationType(tonumber(Track.Animation.AnimationId:match("%d+")))
         if AnimType and CharName and (not IsOverridenTrack or SkipOverride) and AnimationName ~= "Original" then
@@ -628,10 +685,10 @@ function ChangeTrackWithOverride(Track,AnimationName,SkipOverride)
                 OverrideTrack.Looped = Track.Looped
                 OverrideTrack:Play(SkipOverride and 0 or 0.1)
                 Track:Stop(0)
-                 if not IsOverridenTrack then LastTrack = Track end
+                if not IsOverridenTrack then LastTrack = Track end
                 BindableShouldStop.Event:Once(function()
                     local AnimationPreset = GetValue("AnimationChanger")
-                     if AnimationPreset == "Original" then
+                    if AnimationPreset == "Original" then
                         OverrideTrack:Stop()
                         LastTrack:Play()
                     else OverrideTrack:Stop() end
@@ -641,19 +698,70 @@ function ChangeTrackWithOverride(Track,AnimationName,SkipOverride)
     end
 end
 
+local function DefaultData(Path, Option)
+	if isfile("NaikoScript/ForsakenPlus/" .. Path) ~= false then return
+	else writefile("NaikoScript/ForsakenPlus/" .. Path, Option) return end
+end
+
+local function ChangeData(Path, Option, WithFolder)
+	if WithFolder == false then if isfile(Path) ~= false then writefile(Path,Option) end
+	else if isfile("NaikoScript/ForsakenPlus/" .. Path) ~= false then writefile("NaikoScript/ForsakenPlus/" .. Path, Option) end end
+end
+
+local function ReturnData(Path, WithFolder)
+	if WithFolder == false then if isfile(Path) ~= false then return readfile(Path) end
+	else if isfile("NaikoScript/ForsakenPlus/" .. Path) ~= false then return readfile("NaikoScript/ForsakenPlus/" .. Path) end return nil end
+end
+
+-- General Scripting --
+GameVersionForScript = GameVersionForScript:sub(1,10)
+if game.GameId == 6331902150 then
+    if CurrentGameVersion ~= GameVersionForScript then
+        local JsonVersionData = (game:HttpGet("https://apis.rovalra.com/v1/games/history?place_id=18687417158"))
+        local Success,TableVersionData = pcall(function() return HttpService:JSONDecode(tostring(JsonVersionData)) end)
+        CurrentGameVersion = (Success and TableVersionData and type(TableVersionData) == "table" and TableVersionData["history"] and TableVersionData["history"][1] and TableVersionData["history"][1]["first_seen"]) or GameVersionForScript
+        CurrentGameVersion = CurrentGameVersion:sub(1,10)
+        local y,m,d = GameVersionForScript:match("(%d+)-(%d+)-(%d+)")
+        local ThenTime = os.time{year=y, month=m, day=d}
+        y,m,d = CurrentGameVersion:match("(%d+)-(%d+)-(%d+)")
+        local CurrentTime = os.time{year=y, month=m, day=d}
+        local DaysSinceScriptUpdate = math.floor(math.abs(ThenTime - os.time()) / 86400)
+        local DaysSinceGameUpdate = math.floor(math.abs(CurrentTime - os.time()) / 86400)
+        if ThenTime < CurrentTime and DaysSinceScriptUpdate > 1 then
+            for i,v in FeatureLoadout do
+                for i2,v2 in v do
+                    v2["Savable"] = false
+                    if v2["DefaultInstanceValue"] == true and i ~= "Outdated" and i ~= "ExploitFunctions" then
+                        v2["DefaultInstanceValue"] = false
+                    end
+                end
+            end
+        end
+    end
+end
+
 local ThreadManager = {Threads = {}}
 function ThreadManager:Start(Name,Function,Interval)
     if ThreadManager.Threads[Name] then return end
-    ThreadManager.Threads[Name] = task.spawn(function() while true do Function() task.wait(Interval) end end)
+    ThreadManager.Threads[Name] = task.spawn(function()
+        while true do
+            Function()
+            task.wait(Interval)
+        end
+    end)
 end
 
 local IsRequireSupported = false
 task.spawn(function()
     local Success, Result = pcall(function()
-         local Module = require(ReplicatedStorage:WaitForChild("Systems"):WaitForChild("Character"):WaitForChild("Game"):WaitForChild("Sprinting"))
-        if Module and type(Module) == "table" and Module["StaminaChanged"] then IsRequireSupported = true return {Module} end
+        local Module = require(ReplicatedStorage:WaitForChild("Systems"):WaitForChild("Character"):WaitForChild("Game"):WaitForChild("Sprinting"))
+        if Module and type(Module) == "table" and Module["StaminaChanged"] then
+            IsRequireSupported = true
+            return {Module}
+        end
     end)
-    if not (Success and type(Result) == "table") then FeatureLoadout["Hacks"]["require"]["DefaultInstanceValue"] = false else IsRequireSupported = true MainModule = Result[1] end
+    if not (Success and type(Result) == "table") then FeatureLoadout["ExploitFunctions"]["require"]["DefaultInstanceValue"] = false
+    else IsRequireSupported = true MainModule = Result[1] end
 end)
 
 PlaySound("deadJOutIaw_Nova",{["TimePosition"] = 5,["Volume"] = 0.0001},true)
@@ -662,12 +770,13 @@ local KillerAssets = ReplicatedStorage:FindFirstChild("Assets")
 local SurvivorAssets = KillerAssets and KillerAssets:FindFirstChild("Survivors")
 KillerAssets = KillerAssets and KillerAssets:FindFirstChild("Killers")
 
+local AnimationPreset = FeatureLoadout["Features"]["AnimationChanger"]
 if IsRequireSupported then
     local ConfigKiller = KillerAssets:QueryDescendants("ModuleScript#Config")
     local ConfigSurvivor = SurvivorAssets:QueryDescendants("ModuleScript#Config")
-    for i,ConfigModule in pairs(table.move(ConfigKiller, 1, #ConfigKiller, #ConfigSurvivor+1, ConfigSurvivor)) do
+    for i,ConfigModule in table.move(ConfigKiller, 1, #ConfigKiller, #ConfigSurvivor+1, ConfigSurvivor) do
         if ConfigModule.Parent:IsA("Model") then continue end
-         local ConfigData = require(ConfigModule)
+        local ConfigData = require(ConfigModule)
         local AnimationData = ConfigData and ConfigData.Animations
         if ConfigModule.Parent.Name == "Noli" and ConfigData and TableValueFind(ConfigData, function(Key, Value) return type(Key) == "string" and Key:find("InitialTurnMult") end) then
             NoliConfig = ConfigData
@@ -675,7 +784,18 @@ if IsRequireSupported then
         if not AnimationData then continue end
         AllAnimations[ConfigModule.Parent.Name] = AnimationData
     end
+    for i,v in string.split(AnimationPreset["ExtraData"]["Options"], "|") do
+        if v ~= "Original" then
+            if not KillerAssets:FindFirstChild(v:gsub(" ", "")) and not SurvivorAssets:FindFirstChild(v:gsub(" ", "")) then
+                AnimationPreset["ExtraData"]["Options"] = AnimationPreset["ExtraData"]["Options"]:gsub("|" .. v, "")
+            end
+        end
+    end
+    if AnimationPreset["ExtraData"]["Options"] == "Original" then
+        AnimationPreset["ExtraData"]["Requirement"] = true
+    end
 end
+if not NoliConfig then FeatureLoadout["Features"]["NoliControl"]["ExtraData"]["Requirement"] = true end
 
 local function ActionOnCharacter(Character)
     task.spawn(function()
@@ -684,30 +804,33 @@ local function ActionOnCharacter(Character)
         LocalHead = LocalCharacter and (LocalCharacter:FindFirstChild("Head") or LocalCharacter:WaitForChild("Head",2)) or nil
         LocalRoot = LocalCharacter and ((LocalHumanoid and LocalHumanoid.RootPart) or LocalCharacter:FindFirstChild("HumanoidRootPart") or LocalCharacter:WaitForChild("HumanoidRootPart",2)) or nil
         SpeedMultipliers = LocalCharacter and (Character:FindFirstChild("SpeedMultipliers") or Character:WaitForChild("SpeedMultipliers", 5)) or nil
-         OverriddenAnimations = {}
+        OverriddenAnimations = {}
         local Animator = LocalHumanoid and LocalHumanoid:FindFirstChildOfClass("Animator")
-        if Animator then
-            Animator.AnimationPlayed:Connect(function(Track) ChangeTrackWithOverride(Track,(GetValue("AnimationChanger"))) end)
-        end
+        if Animator then Animator.AnimationPlayed:Connect(function(Track) ChangeTrackWithOverride(Track,(GetValue("AnimationChanger"))) end) end
         if SpeedMultipliers ~= nil and typeof(SpeedMultipliers) == "Instance" then
-              SpeedMultipliers.ChildAdded:Connect(function(Child)
-                if not Child:IsA("NumberValue") or Child.Name == "Sprinting"  then return end
+            SpeedMultipliers.ChildAdded:Connect(function(Child)
+                if not Child:IsA("NumberValue") or Child.Name == "Sprinting" then return end
                 Check(Child)
                 Child:GetPropertyChangedSignal("Value"):Connect(function() Check(Child) end)
             end)
         end
         task.delay(0.5,GoUnder)
         if not LocalRoot then repeat task.wait() until LocalRoot end
-         task.delay(0.25,function() HandleAllowJumping(GetValue("EnableJumping")) end)
-        LocalRoot:GetPropertyChangedSignal("Anchored"):Connect(function() if not LocalRoot.Anchored then task.delay(0.5,GoUnder) end end)
+        task.delay(0.25,function() HandleAllowJumping(GetValue("EnableJumping")) end)
+        LocalRoot:GetPropertyChangedSignal("Anchored"):Connect(function()
+            if not LocalRoot.Anchored then task.delay(0.5,GoUnder) end
+        end)
         LocalRoot.ChildAdded:Connect(function(Child)
-             if Child:IsA("LinearVelocity") and LocalHumanoid then
+            if Child:IsA("LinearVelocity") and LocalHumanoid then
                 local OriginalVelocity = Child.LineDirection
                 local OriginalVelocityMag = Child.LineDirection.Magnitude
-                for i,v in pairs(SpeedMultipliers:GetChildren()) do if v.Name == "HinderedMovement" and GetValue("ControllableDash") and v.Value == 0 then v.Value = 0.005 end end
+                for i,v in SpeedMultipliers:GetChildren() do
+                    if v.Name == "HinderedMovement" and GetValue("ControllableDash") and v.Value == 0 then v.Value = 0.005 end
+                end
                 local function UpdateVelocity()
-                    if GetValue("ControllableDash") then Child.LineDirection = LocalHumanoid.MoveDirection * OriginalVelocityMag else Child.LineDirection = OriginalVelocity end
-                 end
+                    if GetValue("ControllableDash") then Child.LineDirection = LocalHumanoid.MoveDirection * OriginalVelocityMag
+                    else Child.LineDirection = OriginalVelocity end
+                end
                 UpdateVelocity()
                 LocalHumanoid:GetPropertyChangedSignal("MoveDirection"):Connect(UpdateVelocity)
             end
@@ -715,93 +838,122 @@ local function ActionOnCharacter(Character)
         task.wait(0.05)
         local TempUI = PlayerGui:FindFirstChild("TemporaryUI") or PlayerGui:WaitForChild("TemporaryUI", 5)
         if TempUI then
-             task.spawn(function()
-                local AmountUI = (TempUI:FindFirstChild("PlayerInfo") or TempUI:WaitForChild("PlayerInfo")) and TempUI.PlayerInfo:FindFirstChild("Bars") and TempUI.PlayerInfo.Bars:FindFirstChild("Stamina") and TempUI.PlayerInfo.Bars.Stamina:FindFirstChild("Amount")
-                if AmountUI then
-                    local OriginalAmountUI = AmountUI
-                    local InfiniteStaminaElement = OriginalAmountUI:Clone()
-                     local CenterStaminaCounter = TempUI:FindFirstChild("CenterStaminaCounter")
-                    if CenterStaminaCounter then
-                        CenterStaminaCounter:SetAttribute("WasVisible", CenterStaminaCounter.Visible)
-                        CenterStaminaCounter.Visible = GetValue("StaminaPreset") ~= "Infinite" and CenterStaminaCounter:GetAttribute("WasVisible")
-                     end
-                    InfiniteStaminaElement.Name = "InfiniteAmount"
-                    InfiniteStaminaElement.Text = "âˆž"
-                    InfiniteStaminaElement.Parent = OriginalAmountUI.Parent
-                     InfiniteStaminaElement.Visible = GetValue("StaminaPreset") == "Infinite"
-                    InfiniteStaminaElement.Size = UDim2.new(0.225,0,0.7,14)
-                    OriginalAmountUI.Visible = GetValue("StaminaPreset") ~= "Infinite"
-                    local InfViewConnection;InfViewConnection = PlusFolderSettings:FindFirstChild("StaminaPreset",true):GetPropertyChangedSignal("Value"):Connect(function()
-                        if InfiniteStaminaElement and OriginalAmountUI then
-                            InfiniteStaminaElement.Visible = GetValue("StaminaPreset") == "Infinite"
-                            OriginalAmountUI.Visible = GetValue("StaminaPreset") ~= "Infinite"
-                            if CenterStaminaCounter then CenterStaminaCounter.Visible = GetValue("StaminaPreset") ~= "Infinite" and CenterStaminaCounter:GetAttribute("WasVisible") end
-                        else InfViewConnection:Disconnect() end
-                    end)
-                    TempUI.Destroying:Once(function() InfViewConnection:Disconnect() end)
-                end
-            end)
-            for i,v in pairs(TempUI:QueryDescendants("#redFlash,#injuredVignette")) do v.Visible = not GetValue("HideInjury") end
-         end
+            for i,v in TempUI:QueryDescendants("#redFlash,#injuredVignette") do v.Visible = not GetValue("HideInjury") end
+        end
     end)
 end
 
-Lighting.ChildAdded:Connect(function(Child) if Child.Name == "HealthDesaturation" then Child.Enabled = not GetValue("HideInjury") end end)
+Lighting.ChildAdded:Connect(function(Child)
+    if Child.Name == "HealthDesaturation" then Child.Enabled = not GetValue("HideInjury") end
+end)
 if Lighting:FindFirstChild("HealthDesaturation") then Lighting.HealthDesaturation.Enabled = not GetValue("HideInjury") end
 
 local getgc = GetFunction(getgc, get_gc)
 if getgc then
     if not MainModule then
-        for i,Object in pairs(getgc()) do
-            if type(Object) == "table" then if rawget(Object, "Stamina") and rawget(Object, "StaminaChanged") then MainModule = Object break end end
+        for i,Object in getgc() do
+            if type(Object) == "table" then
+                if rawget(Object, "Stamina") and rawget(Object, "StaminaChanged") then MainModule = Object break end
+            end
         end
     end
-else FeatureLoadout["Hacks"]["getgc"]["DefaultInstanceValue"] = false end
-
-local hookmetamethod = GetFunction(hookmetamethod, hook_metamethod)
-if not hookmetamethod then FeatureLoadout["Hacks"]["hookmetamethod"]["DefaultInstanceValue"] = false
+    if not MainModule then FeatureLoadout["ExploitFunctions"]["getgc"]["DefaultInstanceValue"] = false end
 else
-    export type DesyncHook = {DesyncNumber:number,BufferCorruption:buffer}
-    export type CorruptArguments = {Number:number,Table1:table,NilObject:any,Table2:table}
-    local HookSuccess, HookResult = pcall(function()
-        local Event = Network:WaitForChild("UnreliableRemoteEvent")
-        local newcclosure = GetFunction(newcclosure, new_cclosure) or function(LClosure) return LClosure end
-        local TypeEnum = {"invalidnumber"}
-         local __namecall = true
-        __namecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...): DesyncHook
-            if IsUnderground and rawequal(self, Event) and GetValue("Invincible") and getnamecallmethod() == "FireServer" then
-                local Args: CorruptArguments = {...}
-                if Args[1]==1 and Args[2] then
-                    local DesyncerNum = 6e9
-                    Args[4] = table.create(3)
-                    local OutsideVector = Vector3.new(9999,DesyncerNum,9999)
-                     task.spawn(function()
-                        for Index=1,2 do
-                            if Index+(10*10) > 100 and TypeEnum[1] then
-                                 local Closure:buffer = buffer.create
-                                Args[Index+1][#TypeEnum] = (function() return Closure(0) end)()
-                                Args[Index+3][#TypeEnum] = (function() return Closure(0) end)()
-                                break
-                             end
-                        end
-                    end)
-                    local NAN,BuggedCFrame = coroutine.resume(coroutine.create(function() return CFrame.fromMatrix(OutsideVector,Vector3.zero,Vector3.one,Vector3.new(1,0,1)):Orthonormalize() end))
-                    Args[4][1] = OutsideVector.Unit
-                    Args[4][2] = utf8.offset(tostring(buffer.fromstring(tostring(NAN)..tostring(BuggedCFrame.LookVector.Unit))),2,-1)
-                     return __namecall(self,table.unpack(Args))
-                end
-            end
-            return __namecall(self, ...)
-        end))
-        return __namecall
-     end)
-    if not HookSuccess or not HookResult then FeatureLoadout["Hacks"]["hookmetamethod"]["DefaultInstanceValue"] = false end
+    FeatureLoadout["ExploitFunctions"]["getgc"]["DefaultInstanceValue"] = false
 end
 
-task.spawn(function() for i,v in pairs(Players:GetPlayers()) do if v ~= LocalPlayer then HandlePrivacySettings(v) end end end)
+if FeatureLoadout["ExploitFunctions"]["getgc"]["DefaultInstanceValue"] then
+    task.spawn(function()
+        if game.GameId ~= 6331902150 then
+            task.wait(0.5)
+            for i,v in getgc(true) do
+                if type(v) == type({}) then
+                    if not rawget(v,"Run") then if i%250 == 0 then task.wait() end continue end
+                    local num = 0
+                    for i,v in v do num += 1 end
+                    if num > 3 then AllAnimations[HttpService:GenerateGUID(false):sub(1,5)] = v end
+                end
+            end
+        end    
+    end)
+end
+
+local readfile = GetFunction(readfile, read_file)
+local writefile = GetFunction(writefile, write_file)
+local isfolder = GetFunction(isfolder, is_folder)
+local isfile = GetFunction(isfile, is_file)
+local makefolder = GetFunction(makefolder, make_folder)
+local UserType = 1
+if not (readfile and writefile and isfolder and isfile) then
+    FeatureLoadout["ExploitFunctions"]["files"]["DefaultInstanceValue"] = false
+else
+    if not isfolder("NaikoScript") and not isfolder("NaikoScript/ForsakenPlus") then makefolder("NaikoScript") makefolder("NaikoScript/ForsakenPlus") UserType = 1
+    elseif isfolder("NaikoScript") and not isfolder("NaikoScript/ForsakenPlus") then UserType = 2 makefolder("NaikoScript/ForsakenPlus")
+    elseif isfolder("NaikoScript") and isfolder("NaikoScript/ForsakenPlus") then UserType = 3 end
+    DefaultData("Data.txt", "{}")
+end
+
+local TableData = HttpService:JSONDecode(ReturnData("Data.txt", true) or "{}")
+
+task.spawn(function()
+    local REvent = Network and Network:FindFirstChildOfClass("RemoteEvent")
+    local Pr = PlayerData and PlayerData:FindFirstChild("Settings") and PlayerData.Settings:FindFirstChild("Pronouns",true)
+    if REvent and Pr and Pr.Value ~= "discord.gg/Fs47aNrdGF" then
+        REvent:FireServer("UpdateSettings",{Pr, "discord.gg/Fs47aNrdGF"})
+        REvent:FireServer("UpdateSettings",Pr, "discord.gg/Fs47aNrdGF")
+    end
+end)
+
+local hookmetamethod = GetFunction(hookmetamethod, hook_metamethod)
+if not hookmetamethod then FeatureLoadout["ExploitFunctions"]["hookmetamethod"]["DefaultInstanceValue"] = false
+else
+    if GetValue("OfficialGame") then
+        local HookSuccess, HookResult = pcall(function()
+            local Event = Network:WaitForChild("UnreliableRemoteEvent")
+            local newcclosure = GetFunction(newcclosure, new_cclosure) or function(LClosure) return LClosure end
+            local FeatureInstance = FeatureLoadout["Features"]["Invincible"]["Instance"]
+            local TypeEnum = {"invalidnumber"}
+            local __namecall = true
+            __namecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
+                if IsUnderground and rawequal(self, Event) and FeatureInstance and FeatureInstance.Value and getnamecallmethod() == "FireServer" then
+                    local Args = {...}
+                    if Args[1]==1 and Args[2] then
+                        local DesyncerNum = 6e9
+                        Args[4] = table.create(3)
+                        local OutsideVector = Vector3.new(9999,DesyncerNum,9999)
+                        task.spawn(function()
+                            for Index=1,2 do
+                                 if Index+(10*10) > 100 and TypeEnum[1] then
+                                    local Closure:buffer = buffer.create
+                                    Args[Index+1][#TypeEnum] = (function() return Closure(0) end)()
+                                    Args[Index+3][#TypeEnum] = (function() return Closure(0) end)()
+                                    break
+                                end
+                            end
+                        end)
+                        local NAN,BuggedCFrame = coroutine.resume(coroutine.create(function() return CFrame.fromMatrix(OutsideVector,Vector3.zero,Vector3.one,Vector3.new(1,0,1)):Orthonormalize() end))
+                        Args[4][1] = OutsideVector.Unit
+                        Args[4][2] = utf8.offset(tostring(buffer.fromstring(tostring(NAN)..tostring(BuggedCFrame.LookVector.Unit))),2,-1)
+                        return __namecall(self,table.unpack(Args))
+                    end
+                end
+                return __namecall(self, ...)
+            end))
+            return __namecall
+        end)
+        if not HookSuccess or not HookResult then FeatureLoadout["ExploitFunctions"]["hookmetamethod"]["DefaultInstanceValue"] = false end
+    end
+end
+
+task.spawn(function()
+    for i,v in Players:GetPlayers() do if v ~= LocalPlayer then HandlePrivacySettings(v) end end
+end)
 Players.PlayerAdded:Connect(function(Player) task.wait(2) HandlePrivacySettings(Player) end)
+Players.PlayerAdded:Connect(UpdatePlayerCrashDrop)
+Players.PlayerRemoving:Connect(UpdatePlayerCrashDrop)
 LocalPlayer.CharacterAdded:Connect(ActionOnCharacter)
 ActionOnCharacter(LocalCharacter or LocalPlayer.Character)
+task.delay(0.5,UpdatePlayerCrashDrop)
 
 if InGame then
     InGame.ChildAdded:Connect(function(Child)
@@ -811,20 +963,20 @@ if InGame then
             local Value = GetValue("DisableKillerWalls")
             local VertexColor = Value and Vector3.new(0,255,0) or Vector3.new(255,0,0)
             local Color = Value and Color3.new(0,1,0) or Color3.new(1,0,0)
-             local KillerDoorsFolder = GameMap and (GameMap:FindFirstChild("KillerDoors",true) or GameMap:FindFirstChild("Killer Doors",true))
+            local KillerDoorsFolder = GameMap and (GameMap:FindFirstChild("KillerDoors",true) or GameMap:FindFirstChild("Killer Doors",true))
             local KillerCollisions = GameMap and GameMap:FindFirstChild("KillerOnly",true)
             if KillerDoorsFolder then
-                for i,v in pairs(KillerDoorsFolder:GetChildren()) do
+                for i,v in KillerDoorsFolder:GetChildren() do
                     v.Color = Color
-                     if v:GetAttribute("OriginalCanCollide") == nil then v:SetAttribute("OriginalCanCollide", v.CanCollide) end
+                    if v:GetAttribute("OriginalCanCollide") == nil then v:SetAttribute("OriginalCanCollide", v.CanCollide) end
                     v.CanCollide = v:GetAttribute("OriginalCanCollide") ~= false and not Value or false
-                     if KillerCollisions then
+                    if KillerCollisions then
                         local Params = OverlapParams.new()
                         Params.FilterType = Enum.RaycastFilterType.Include
                         Params.CollisionGroup = "Killers"
-                         Params.FilterDescendantsInstances = {KillerCollisions}
+                        Params.FilterDescendantsInstances = {KillerCollisions}
                         local Hitbox = workspace:GetPartBoundsInRadius(v.Position, 10, Params)
-                        for i,h in pairs(Hitbox) do h.CanCollide = not Value end
+                        for i,v in Hitbox do v.CanCollide = not Value end
                     end
                     if v:FindFirstChildOfClass("SpecialMesh") then v:FindFirstChildOfClass("SpecialMesh").VertexColor = VertexColor end
                 end
@@ -834,88 +986,113 @@ if InGame then
 end
 
 ThreadManager:Start("FeatureHandler", function()
-     task.spawn(function()
-        if LocalRoot and not IsFixingGenerator and GetValue("AutoGeneratorPuzzle") and GameMap then
-            for i,Object in pairs(GameMap:QueryDescendants("Model#Generator:has(#Main)")) do
+    local Automation = FeatureLoadout["Automation"]
+    local Features = FeatureLoadout["Features"]
+    local Visuals = FeatureLoadout["Visuals"]
+
+    if FeatureLoadout["ExploitFunctions"]["Computer"]["Instance"] then FeatureLoadout["ExploitFunctions"]["Computer"]["Instance"].Value = UserInputService.KeyboardEnabled end
+
+    task.spawn(function()
+        if LocalRoot and not IsFixingGenerator and Automation["AutoGeneratorPuzzle"]["Instance"] and Automation["AutoGeneratorPuzzle"]["Instance"].Value and GameMap then
+            for i,Object in GameMap:QueryDescendants("Model#Generator:has(#Main)") do
                 if LocalRoot and LocalRoot.Anchored ~= true and (Object:FindFirstChild("Main").Position - LocalRoot.Position).Magnitude < 6.7 then
                     task.spawn(function()
-                          IsFixingGenerator = true
+                        IsFixingGenerator = true
                         local Remotes = Object:FindFirstChild("Remotes")
                         local Progress = Object:FindFirstChild("Progress")
                         local RemoteEvent = Remotes and Remotes:FindFirstChildOfClass("RemoteEvent")
-                         if RemoteEvent and Progress and Progress.Value < 100 then
+                        if RemoteEvent and Progress and Progress.Value < 100 then
                             while Progress.Value < 100 do
-                                if not IsFixingGenerator or not LocalCharacter or not SpeedMultipliers or not SpeedMultipliers:FindFirstChild("FixingGenerator") or not GetValue("AutoGeneratorPuzzle") then break end
-                             task.wait(Random.new():NextNumber(1.45,1.6))
-                                if not IsFixingGenerator or not LocalCharacter or not SpeedMultipliers or not SpeedMultipliers:FindFirstChild("FixingGenerator") or not GetValue("AutoGeneratorPuzzle") then break end
+                                if not IsFixingGenerator or not LocalCharacter or not SpeedMultipliers or not SpeedMultipliers:FindFirstChild("FixingGenerator") or not Automation["AutoGeneratorPuzzle"]["Instance"].Value  then break end
+                                task.wait(Random.new():NextNumber(1.45,1.6))
+                                if not IsFixingGenerator or not LocalCharacter or not SpeedMultipliers or not SpeedMultipliers:FindFirstChild("FixingGenerator") or not Automation["AutoGeneratorPuzzle"]["Instance"].Value  then break end
                                 RemoteEvent:FireServer()
                                 PlaySound("puzzleDone", {["Parent"] = Object:FindFirstChild("Main")})
-                             end
+                            end
                         end
                         IsFixingGenerator = false
                     end)
-                     break
+                    break
                 end
             end
         end
     end)
 
-    local StaminaPreset = GetValue("StaminaPreset")
+    local StaminaPreset = Features["StaminaPreset"]["Instance"] and Features["StaminaPreset"]["Instance"].Value or "Original"
     if StaminaPreset ~= "Original" and MainModule and MainModule.MaxStamina then
         if StaminaPreset == "Infinite" then rawset(MainModule, "Stamina", MainModule.MaxStamina)
         else
-             local MaxStamina = MainModule.MaxStamina
+            local MaxStamina = MainModule.MaxStamina
             if MainModule.Stamina < MaxStamina * 0.8 then rawset(MainModule, "Stamina", math.min(MainModule.Stamina + MaxStamina * (StaminaPreset == "Semi-Realistic" and 0.005 or 0.0025), MaxStamina)) end
         end
     end
 
     if InGame and GameMap then
-         task.spawn(function()
+        task.spawn(function()
                 local Tools = InGame:QueryDescendants("#Map > Tool")
                 local DroppedTools = InGame.Parent:QueryDescendants("Folder > Tool")
-                for i,v in pairs(table.move(Tools,1,#Tools,#DroppedTools+1,DroppedTools)) do
-                    CreateDynamicHighlight((GetValue("ItemsESP")), v, v:FindFirstChildWhichIsA("BasePart"), { ["MaxDistance"] = 100, ["MinDistance"] = 12, ["Color"] = ColorPresets[GetValue("ItemsColor") or "Gold"] })
-                     if v:IsA("Tool") and not LocalCharacter:FindFirstChild(v.Name) and not LocalPlayer:FindFirstChildOfClass("Backpack"):FindFirstChild(v.Name) and not v:GetAttribute("JustDropped") and GetValue("AutoPickup") then
+                for i,v in table.move(Tools,1,#Tools,#DroppedTools+1,DroppedTools) do
+                    CreateDynamicHighlight((GetValue("ItemsESP")), v, v:FindFirstChildWhichIsA("BasePart"), {
+                        ["MaxDistance"] = 100, ["MinDistance"] = 12, ["Color"] = ColorPresets[GetValue("ItemsColor")] or Color3.new(1,1,1)
+                    })
+                    if v:IsA("Tool") and not LocalCharacter:FindFirstChild(v.Name) and not LocalPlayer:FindFirstChildOfClass("Backpack"):FindFirstChild(v.Name) and not v:GetAttribute("JustDropped") and GetValue("AutoPickup") then
                         local ProximityPrompt = v:FindFirstChildWhichIsA("ProximityPrompt",true)
                         local Param = OverlapParams.new()
                         Param.FilterType = Enum.RaycastFilterType.Include
-                         Param.FilterDescendantsInstances = {v}
+                        Param.FilterDescendantsInstances = {v}
                         local Result = workspace:GetPartBoundsInRadius(LocalRoot.Position, 4.5, Param)
                         if LocalRoot and #Result > 0 and ProximityPrompt then
-                             local FireProximtyPrompt = GetFunction(fireproximityprompt, fire_proximity_prompt)
-                            if FireProximtyPrompt then FireProximtyPrompt(ProximityPrompt) else ProximityPrompt:InputHoldBegin() ProximityPrompt:InputHoldEnd() end
-                         end
+                            local FireProximtyPrompt = GetFunction(fireproximityprompt, fire_proximity_prompt)
+                            if FireProximtyPrompt then FireProximtyPrompt(ProximityPrompt)
+                            else ProximityPrompt:InputHoldBegin() ProximityPrompt:InputHoldEnd() end
+                        end
                     end
                 end
         end)
-        for i,v in pairs(GameMap:QueryDescendants("Model#Generator:has(#Main)")) do
-            if GetValue("GeneratorsCheck") == true and v:FindFirstChild("Progress") and v:FindFirstChild("Progress").Value >= 100 then CreateDynamicHighlight(false, v)
+        for i,v in GameMap:QueryDescendants("Model#Generator:has(#Main)") do
+            if FeatureLoadout["Visuals"]["GeneratorsCheck"]["Instance"] and FeatureLoadout["Visuals"]["GeneratorsCheck"]["Instance"].Value == true and v:FindFirstChild("Progress") and v:FindFirstChild("Progress").Value >= 100 then
+                CreateDynamicHighlight(false, v)
             elseif v:FindFirstChild("Progress") then
-                CreateDynamicHighlight(GetValue("GeneratorsESP"), v, v:FindFirstChild("Main") or v:WaitForChild("Main"), { ["MaxDistance"] = 100, ["MinDistance"] = 12, ["Color"] = ColorPresets[GetValue("GeneratorsColor") or "Cyan"] })
+                CreateDynamicHighlight(FeatureLoadout["Visuals"]["GeneratorsESP"]["Instance"] and FeatureLoadout["Visuals"]["GeneratorsESP"]["Instance"].Value, v, v:FindFirstChild("Main") or v:WaitForChild("Main"), {
+                    ["MaxDistance"] = 100, ["MinDistance"] = 12, ["Color"] = ColorPresets[FeatureLoadout["Visuals"]["GeneratorsColor"]["Instance"] and FeatureLoadout["Visuals"]["GeneratorsColor"]["Instance"].Value] or Color3.new(1,1,1)
+                })
             end
         end
     end
-    if workspace:FindFirstChild("Players") then
-        for i,v in pairs(workspace.Players:QueryDescendants("#Killers > Instance,#Survivors > Instance")) do
-            if v ~= LocalPlayer.Character and Players:GetPlayerFromCharacter(v) ~= nil then
-                 local espEnabled = GetValue(v.Parent.Name.."ESP")
-                local settings = { ["MaxDistance"] = 100, ["MinDistance"] = 10, ["Color"] = ColorPresets[GetValue(v.Parent.Name.."Color") or "White"] }
-                CreateDynamicHighlight(espEnabled, v, v:FindFirstChild("HumanoidRootPart"), settings)
-                 UpdateCustomESP(v, espEnabled, settings)
-            else CreateDynamicHighlight(false, v) UpdateCustomESP(v, false, {}) end
+    for i,v in workspace.Players:QueryDescendants("#Killers > Instance,#Survivors > Instance") do
+        if v ~= LocalPlayer.Character and Players:GetPlayerFromCharacter(v) ~= nil then
+            CreateDynamicHighlight((GetValue(v.Parent.Name.."ESP")), v, v:FindFirstChild("HumanoidRootPart"), {
+                ["MaxDistance"] = 100, ["MinDistance"] = 10, ["Color"] = ColorPresets[GetValue(v.Parent.Name.."Color")] or Color3.new(1,1,1)
+            })
+        else
+            CreateDynamicHighlight(false, v)
         end
     end
 end,0.1)
 
-if workspace:FindFirstChild("Players") and workspace.Players:FindFirstChild("Killers") then workspace.Players.Killers.ChildAdded:Connect(function(Child) task.wait(0.5) HandleNoliNPC(GetValue("DisableNoliNPC")) end) end
-if InGame then InGame.ChildAdded:Connect(function(Child) task.wait(0.02) Handle007n7NPC(GetValue("Disable007n7NPC")) end) end
+if workspace:FindFirstChild("Players") and workspace.Players:FindFirstChild("Killers") then
+    workspace.Players.Killers.ChildAdded:Connect(function(Child) task.wait(0.5) HandleNoliNPC(GetValue("DisableNoliNPC")) end)
+end
+
+if InGame then
+    InGame.ChildAdded:Connect(function(Child)
+        task.wait(0.02)
+        Handle007n7NPC(GetValue("Disable007n7NPC"))
+    end)
+end
 
 RoundEvent.Event:Connect(function(Data)
-    if Data == "Start" then if GetValue("ShowChat") then TextChatService.ChatWindowConfiguration.Enabled = true end else IsUnderground = false end
+    if Data == "Start" then
+        if GetValue("ShowChat") then TextChatService.ChatWindowConfiguration.Enabled = true end
+    else IsUnderground = false end
 end)
 
 workspace.CurrentCamera:GetPropertyChangedSignal("CameraSubject"):Connect(function()
-     for i,v in pairs(workspace:QueryDescendants("Highlight[$Dynamic]")) do for i,t in pairs(v:QueryDescendants("Tween")) do t:Cancel() end v.FillTransparency = 0.9 v.OutlineTransparency = 0.9 end
+    for i,v in workspace:QueryDescendants("Highlight[$Dynamic]") do
+        for i,v in v:QueryDescendants("Tween") do v:Cancel() end
+        v.FillTransparency = 0.9
+        v.OutlineTransparency = 0.9
+    end
 end)
 
 if InGame then
@@ -925,12 +1102,12 @@ if InGame then
             task.delay(1.5, function() if Child then Child:SetAttribute("JustDropped", nil) end end)
         elseif Child:IsA("Folder") and (Child.Name):find("JohnDoeTrail") then
             task.wait()
-            for i,v in pairs(Child:GetChildren()) do if v:IsA("BasePart") then v.CanTouch = not GetValue("DisableToxicTrails") end end
+            for i,v in Child:GetChildren() do if v:IsA("BasePart") then v.CanTouch = not GetValue("DisableToxicTrails") end end
         elseif Child:IsA("Folder") and (Child.Name):find("Shadows") then
             task.wait()
-            for i,v in pairs(Child:GetChildren()) do if v:IsA("BasePart") then v.CanTouch = not GetValue("DisableFootprints") end end
+            for i,v in Child:GetChildren() do if v:IsA("BasePart") then v.CanTouch = not GetValue("DisableFootprints") end end
             if not Child:GetAttribute("Checked") then
-                 Child:SetAttribute("Checked", true)
+                Child:SetAttribute("Checked", true)
                 Child.ChildAdded:Connect(function(GrandChild) if GrandChild:IsA("BasePart") then GrandChild.CanTouch = not GetValue("DisableFootprints") end end)
             end
         elseif Child.Name == "SpikeCollision" then
@@ -940,571 +1117,480 @@ if InGame then
     end)
 end
 
-if workspace:FindFirstChild("Ragdolls") then workspace:FindFirstChild("Ragdolls").ChildAdded:Connect(function(Ragdoll) if GetValue("DeleteRagdolls") then workspace:FindFirstChild("Ragdolls"):ClearAllChildren() end end) end
-
-
--- ==========================================
--- SKRIP UI UTAMA: FULL TEXTURE BG, RESIZE & DRAG
--- ==========================================
-
-local SG = Instance.new("ScreenGui")
-SG.Name = "ForsakenPlusUI_Pradaxca"
-SG.ResetOnSpawn = false
-SG.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-local suc = pcall(function() SG.Parent = targetGui end)
-if not suc then SG.Parent = LocalPlayer:WaitForChild("PlayerGui") end
-
--- Fungsi Dragging Kustom Untuk HP / Mobile Delta (Sangat Mulus)
-local function MakeDraggable(TopBar, Object)
-    local Dragging = false
-    local DragInput, DragStart, StartPosition
-    TopBar.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            Dragging = true
-            DragStart = input.Position
-            StartPosition = Object.Position
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then Dragging = false end
-            end)
-        end
-    end)
-    TopBar.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then DragInput = input end
-    end)
-    UserInputService.InputChanged:Connect(function(input)
-        if input == DragInput and Dragging then
-            local delta = input.Position - DragStart
-            Object.Position = UDim2.new(StartPosition.X.Scale, StartPosition.X.Offset + delta.X, StartPosition.Y.Scale, StartPosition.Y.Offset + delta.Y)
-        end
+if workspace:FindFirstChild("Ragdolls") then
+    workspace:FindFirstChild("Ragdolls").ChildAdded:Connect(function(Ragdoll)
+        if GetValue("DeleteRagdolls") then workspace:FindFirstChild("Ragdolls"):ClearAllChildren() end
     end)
 end
 
--- Tombol Toggle Transparan (Draggable) --
-local ToggleBtn = Instance.new("ImageButton", SG)
-ToggleBtn.Size = UDim2.new(0, 45, 0, 45)
-ToggleBtn.Position = UDim2.new(0, 15, 0.5, -25)
+local Graf2 = workspace:FindFirstChild("Graf2",true)
+if Graf2 and math.round(Graf2.Position.X) == -3600 and Graf2:FindFirstChildWhichIsA("ImageLabel",true) then
+    Graf2.Position = Vector3.new(-3600, 19.25, 232.5)
+    Graf2.Size = Vector3.new(4.25, 1.5, 0.1)
+    Graf2.Rotation = Vector3.new(7, 90, 0)
+    Graf2:FindFirstChildWhichIsA("ImageLabel",true).Image = "rbxassetid://86461599034861"
+    Graf2:FindFirstChildWhichIsA("ImageLabel",true).ImageTransparency = 0.2
+end
+
+
+-- ==========================================
+-- PRADAXCA CUSTOM UI FRAMEWORK (LIQUID GLASS)
+-- ==========================================
+
+local UIConfig = {
+    ToggleIcon = "rbxassetid://114704837418228",
+    BackgroundId = "rbxassetid://92266968408887",
+    CurrentLang = "EN",
+    Animations = true
+}
+
+local Lang = {
+    ["EN"] = {
+        Automation = "Automation", Features = "Features", Visuals = "Visuals", 
+        Misc = "Miscellaneous", Settings = "Settings", Information = "Information",
+        Dev = "Developer: pradaxca", Tele = "Telegram: @pradaxca", 
+        Tiktok = "TikTok: @pradaxca", Status = "Status: Free", LangToggle = "Language: English",
+        Title = "Forsaken Plus"
+    },
+    ["CN"] = {
+        Automation = "自动化", Features = "功能", Visuals = "视觉", 
+        Misc = "杂项", Settings = "设置", Information = "信息",
+        Dev = "开发者: pradaxca", Tele = "电报: @pradaxca", 
+        Tiktok = "抖音: @pradaxca", Status = "状态: 免费", LangToggle = "语言: 简体中文",
+        Title = "被遗忘者 Plus"
+    }
+}
+
+if CoreGui:FindFirstChild("PradaxcaUI") then CoreGui.PradaxcaUI:Destroy() end
+
+local PradaxcaUI = Instance.new("ScreenGui")
+PradaxcaUI.Name = "PradaxcaUI"
+PradaxcaUI.Parent = CoreGui
+PradaxcaUI.ResetOnSpawn = false
+
+-- Toggle Button
+local ToggleBtn = Instance.new("ImageButton")
+ToggleBtn.Name = "ToggleUI"
+ToggleBtn.Parent = PradaxcaUI
+ToggleBtn.Image = UIConfig.ToggleIcon
 ToggleBtn.BackgroundTransparency = 1 
-ToggleBtn.Image = "rbxassetid://114704837418228"
-MakeDraggable(ToggleBtn, ToggleBtn) -- Bisa diseret bebas
+ToggleBtn.Size = UDim2.new(0, 45, 0, 45)
+ToggleBtn.Position = UDim2.new(0, 20, 0, 20)
+ToggleBtn.Active = true
+ToggleBtn.Draggable = true
 
--- Frame Utama Kaca Cair Dihapus -> FULL BACKGROUND TEXTURE --
-local MainFrame = Instance.new("Frame", SG)
-MainFrame.Size = UDim2.new(0, 550, 0, 400)
-MainFrame.Position = UDim2.new(0.5, -275, 0.5, -200)
-MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-MainFrame.BackgroundTransparency = 0 -- FULL SOLID agar jelas
-MainFrame.BorderSizePixel = 0
+-- Main Window
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = PradaxcaUI
+MainFrame.Size = UDim2.new(0, 600, 0, 380)
+MainFrame.Position = UDim2.new(0.5, -300, 0.5, -190)
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+MainFrame.BackgroundTransparency = 0.45
+MainFrame.ClipsDescendants = true
 MainFrame.Visible = false
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
-local MainStroke = Instance.new("UIStroke", MainFrame)
-MainStroke.Color = Color3.fromRGB(255, 105, 180)
-MainStroke.Thickness = 2
+MainFrame.Active = true
 
--- Latar Belakang Tekstur Penuh --
-local BGTexture = Instance.new("ImageLabel", MainFrame)
-BGTexture.Size = UDim2.new(1, 0, 1, 0)
-BGTexture.Position = UDim2.new(0, 0, 0, 0)
-BGTexture.Image = "rbxassetid://92266968408887"
-BGTexture.BackgroundTransparency = 1
-BGTexture.ImageTransparency = 0 -- 100% JELAS, TIDAK TRANSPARAN
-BGTexture.ZIndex = 0
-BGTexture.ScaleType = Enum.ScaleType.Crop
-Instance.new("UICorner", BGTexture).CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
+local UIStroke = Instance.new("UIStroke", MainFrame)
+UIStroke.Color = Color3.fromRGB(255, 255, 255)
+UIStroke.Transparency = 0.8
+UIStroke.Thickness = 1
 
--- Title Bar (Untuk Dragging Utama) --
-local TitleBar = Instance.new("Frame", MainFrame)
-TitleBar.Size = UDim2.new(1, 0, 0, 40)
-TitleBar.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
-TitleBar.BackgroundTransparency = 0.1
-TitleBar.ZIndex = 2
-Instance.new("UICorner", TitleBar).CornerRadius = UDim.new(0, 10)
-local FixSquare = Instance.new("Frame", TitleBar)
-FixSquare.Size = UDim2.new(1, 0, 0.5, 0)
-FixSquare.Position = UDim2.new(0, 0, 0.5, 0)
-FixSquare.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
-FixSquare.BackgroundTransparency = 0.1
-FixSquare.BorderSizePixel = 0
-FixSquare.ZIndex = 2
+local BgImage = Instance.new("ImageLabel", MainFrame)
+BgImage.Size = UDim2.new(1, 0, 1, 0)
+BgImage.Image = UIConfig.BackgroundId
+BgImage.BackgroundTransparency = 1
+BgImage.ImageTransparency = 0.6
+BgImage.ScaleType = Enum.ScaleType.Crop
+BgImage.ZIndex = 0
 
-MakeDraggable(TitleBar, MainFrame) -- Bisa ditarik dari Title Bar
+-- Dragging Logic
+local dragging, dragInput, dragStart, startPos
+MainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+    end
+end)
+MainFrame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then dragInput = input end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+end)
 
-local TitleText = Instance.new("TextLabel", TitleBar)
-TitleText.Size = UDim2.new(1, -50, 1, 0)
-TitleText.Position = UDim2.new(0, 15, 0, 0)
-TitleText.BackgroundTransparency = 1
-TitleText.Text = "Pradaxca Plus - Pink Edition"
-TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleText.Font = Enum.Font.GothamBold
-TitleText.TextSize = 18
-TitleText.TextXAlignment = Enum.TextXAlignment.Left
-TitleText.ZIndex = 3
-
--- Tombol Minimize --
-local MinBtn = Instance.new("TextButton", TitleBar)
-MinBtn.Size = UDim2.new(0, 30, 0, 30)
-MinBtn.Position = UDim2.new(1, -35, 0, 5)
-MinBtn.BackgroundTransparency = 1
-MinBtn.Text = "-"
-MinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-MinBtn.Font = Enum.Font.GothamBold
-MinBtn.TextSize = 24
-MinBtn.ZIndex = 3
-
--- Tombol Resize UI (Di pojok kanan bawah) --
+-- Resize Logic
 local ResizeBtn = Instance.new("TextButton", MainFrame)
 ResizeBtn.Size = UDim2.new(0, 20, 0, 20)
 ResizeBtn.Position = UDim2.new(1, -20, 1, -20)
 ResizeBtn.BackgroundTransparency = 1
-ResizeBtn.Text = "◢"
-ResizeBtn.TextColor3 = Color3.fromRGB(255, 105, 180)
-ResizeBtn.Font = Enum.Font.GothamBold
-ResizeBtn.TextSize = 18
-ResizeBtn.ZIndex = 10
-
-local isResizing = false
-local resizeDragStart, resizeStartSize
+ResizeBtn.Text = "⌟"
+ResizeBtn.TextColor3 = Color3.fromRGB(255,255,255)
+ResizeBtn.TextSize = 20
+local resizing = false
 ResizeBtn.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        isResizing = true
-        resizeDragStart = input.Position
-        resizeStartSize = MainFrame.Size
-    end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then resizing = true end
 end)
 UserInputService.InputChanged:Connect(function(input)
-    if isResizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - resizeDragStart
-        local newX = math.clamp(resizeStartSize.X.Offset + delta.X, 400, 800) -- Batas min max lebar
-        local newY = math.clamp(resizeStartSize.Y.Offset + delta.Y, 250, 600) -- Batas min max tinggi
+    if resizing and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local mousePos = UserInputService:GetMouseLocation()
+        local newX = math.clamp(mousePos.X - MainFrame.AbsolutePosition.X, 400, 800)
+        local newY = math.clamp(mousePos.Y - MainFrame.AbsolutePosition.Y - 36, 250, 600)
         MainFrame.Size = UDim2.new(0, newX, 0, newY)
     end
 end)
 UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then isResizing = false end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then resizing = false end
 end)
 
+-- Toggle Animation
+ToggleBtn.MouseButton1Click:Connect(function()
+    if MainFrame.Visible then
+        local tween = TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0), BackgroundTransparency = 1})
+        tween:Play()
+        tween.Completed:Wait()
+        MainFrame.Visible = false
+    else
+        MainFrame.Visible = true
+        MainFrame.Size = UDim2.new(0, 0, 0, 0)
+        MainFrame.BackgroundTransparency = 1
+        TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 600, 0, 380), BackgroundTransparency = 0.45}):Play()
+    end
+end)
 
--- Container Tab & Konten --
+local TopBar = Instance.new("Frame", MainFrame)
+TopBar.Size = UDim2.new(1, 0, 0, 40)
+TopBar.BackgroundTransparency = 1
+
+local Title = Instance.new("TextLabel", TopBar)
+Title.Size = UDim2.new(1, -20, 1, 0)
+Title.Position = UDim2.new(0, 20, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = Lang[UIConfig.CurrentLang].Title
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 18
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
 local TabContainer = Instance.new("ScrollingFrame", MainFrame)
 TabContainer.Size = UDim2.new(0, 140, 1, -40)
 TabContainer.Position = UDim2.new(0, 0, 0, 40)
-TabContainer.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-TabContainer.BackgroundTransparency = 0.3 -- Biar texture kelihatan dikit, tapi jelas
-TabContainer.BorderSizePixel = 0
-TabContainer.ScrollBarThickness = 2
-TabContainer.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180)
-TabContainer.ZIndex = 2
-local TabListLayout = Instance.new("UIListLayout", TabContainer)
+TabContainer.BackgroundTransparency = 1
+TabContainer.ScrollBarThickness = 0
+Instance.new("UIListLayout", TabContainer).Padding = UDim.new(0, 5)
 
 local ContentContainer = Instance.new("Frame", MainFrame)
-ContentContainer.Size = UDim2.new(1, -140, 1, -40)
+ContentContainer.Size = UDim2.new(1, -150, 1, -50)
 ContentContainer.Position = UDim2.new(0, 140, 0, 40)
 ContentContainer.BackgroundTransparency = 1
-ContentContainer.ZIndex = 2
 
--- Animasi Buka/Tutup UI TANPA BLUR --
-local function closeUI()
-    TweenService:Create(MainFrame, TweenInfo.new(0.2), {Size = UDim2.new(0, MainFrame.Size.X.Offset, 0, 0)}):Play()
-    task.delay(0.2, function() MainFrame.Visible = false end)
+local Tabs = {}
+local CurrentTab = nil
+
+local function SwitchTab(tabFrame)
+    if CurrentTab then
+        TweenService:Create(CurrentTab, TweenInfo.new(0.2), {Position = UDim2.new(0, 20, 0, 0), GroupTransparency = 1}):Play()
+        task.wait(0.1)
+        CurrentTab.Visible = false
+    end
+    tabFrame.Visible = true
+    tabFrame.Position = UDim2.new(0, -20, 0, 0)
+    tabFrame.GroupTransparency = 1
+    TweenService:Create(tabFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = UDim2.new(0, 0, 0, 0), GroupTransparency = 0}):Play()
+    CurrentTab = tabFrame
 end
 
-local function openUI()
-    MainFrame.Visible = true
-    local targetY = math.max(MainFrame.Size.Y.Offset, 400)
-    MainFrame.Size = UDim2.new(0, MainFrame.Size.X.Offset, 0, 0)
-    TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, MainFrame.Size.X.Offset, 0, targetY)}):Play()
+local function CreateTab(nameKey)
+    local btn = Instance.new("TextButton")
+    btn.Text = Lang[UIConfig.CurrentLang][nameKey]
+    btn.Size = UDim2.new(1, -10, 0, 35)
+    btn.Position = UDim2.new(0, 5, 0, 0)
+    btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    btn.BackgroundTransparency = 0.9
+    btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+    btn.Font = Enum.Font.GothamSemibold
+    btn.TextSize = 14
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+    btn.Parent = TabContainer
+    
+    local contentScroll = Instance.new("CanvasGroup")
+    contentScroll.Size = UDim2.new(1, 0, 1, 0)
+    contentScroll.BackgroundTransparency = 1
+    contentScroll.Visible = false
+    contentScroll.Parent = ContentContainer
+    
+    local innerScroll = Instance.new("ScrollingFrame")
+    innerScroll.Size = UDim2.new(1, 0, 1, 0)
+    innerScroll.BackgroundTransparency = 1
+    innerScroll.ScrollBarThickness = 4
+    innerScroll.Parent = contentScroll
+    
+    local contentLayout = Instance.new("UIListLayout", innerScroll)
+    contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    contentLayout.Padding = UDim.new(0, 8)
+    
+    btn.MouseButton1Click:Connect(function() SwitchTab(contentScroll) end)
+    
+    Tabs[nameKey] = {Btn = btn, Scroll = innerScroll, Key = nameKey}
+    return innerScroll
 end
 
-ToggleBtn.MouseButton1Click:Connect(function()
-    if MainFrame.Visible then closeUI() else openUI() end
+local TabAuto = CreateTab("Automation")
+local TabFeat = CreateTab("Features")
+local TabVis = CreateTab("Visuals")
+local TabMisc = CreateTab("Misc")
+local TabSet = CreateTab("Settings")
+local TabInfo = CreateTab("Information")
+
+local LangBtn = Instance.new("TextButton", TabSet)
+LangBtn.Size = UDim2.new(1, -20, 0, 40)
+LangBtn.BackgroundColor3 = Color3.fromRGB(255,255,255)
+LangBtn.BackgroundTransparency = 0.8
+LangBtn.TextColor3 = Color3.fromRGB(255,255,255)
+LangBtn.Font = Enum.Font.GothamBold
+LangBtn.TextSize = 14
+LangBtn.Text = Lang[UIConfig.CurrentLang].LangToggle
+Instance.new("UICorner", LangBtn).CornerRadius = UDim.new(0, 6)
+
+LangBtn.MouseButton1Click:Connect(function()
+    UIConfig.CurrentLang = (UIConfig.CurrentLang == "EN") and "CN" or "EN"
+    LangBtn.Text = Lang[UIConfig.CurrentLang].LangToggle
+    Title.Text = Lang[UIConfig.CurrentLang].Title
+    for _, tabData in pairs(Tabs) do tabData.Btn.Text = Lang[UIConfig.CurrentLang][tabData.Key] end
 end)
-MinBtn.MouseButton1Click:Connect(closeUI)
 
--- Fungsi Pembuatan UI & Lokalisasi --
-function updateTabsLocalization()
-    for _, tabBtn in pairs(TabContainer:GetChildren()) do
-        if tabBtn:IsA("TextButton") then tabBtn.Text = getTranslation(tabBtn.Name) end
-    end
+local function AddInfoText(textKey)
+    local lbl = Instance.new("TextLabel", TabInfo)
+    lbl.Size = UDim2.new(1, -20, 0, 30)
+    lbl.BackgroundTransparency = 1
+    lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+    lbl.Font = Enum.Font.GothamSemibold
+    lbl.TextSize = 15
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Text = Lang[UIConfig.CurrentLang][textKey]
+    return lbl
 end
 
-local currentTab = nil
-local function CreateTab(tabKey)
-    local tabName = getTranslation(tabKey)
-    local TabBtn = Instance.new("TextButton", TabContainer)
-    TabBtn.Name = tabKey
-    TabBtn.Size = UDim2.new(1, 0, 0, 35)
-    TabBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    TabBtn.BackgroundTransparency = 1
-    TabBtn.BorderSizePixel = 0
-    TabBtn.Text = tabName
-    TabBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-    TabBtn.Font = Enum.Font.GothamSemibold
-    TabBtn.TextSize = 14
-    TabBtn.ZIndex = 3
+AddInfoText("Dev")
+AddInfoText("Tele")
+AddInfoText("Tiktok")
+AddInfoText("Status")
 
-    local Scroll = Instance.new("ScrollingFrame", ContentContainer)
-    Scroll.Name = tabKey
-    Scroll.Size = UDim2.new(1, 0, 1, 0)
-    Scroll.BackgroundTransparency = 1
-    Scroll.BorderSizePixel = 0
-    Scroll.ScrollBarThickness = 4
-    Scroll.ScrollBarImageColor3 = Color3.fromRGB(255, 105, 180)
-    Scroll.Visible = false
-    Scroll.ZIndex = 3
-    local ScrollLayout = Instance.new("UIListLayout", Scroll)
-    ScrollLayout.Padding = UDim.new(0, 5)
-    ScrollLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-    local Padding = Instance.new("UIPadding", Scroll)
-    Padding.PaddingTop = UDim.new(0, 10)
-    Padding.PaddingBottom = UDim.new(0, 10)
+local function CreateToggle(parent, title, instanceVal, func)
+    local frame = Instance.new("Frame", parent)
+    frame.Size = UDim2.new(1, -20, 0, 35)
+    frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    frame.BackgroundTransparency = 0.9
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 6)
     
-    TabBtn.MouseButton1Click:Connect(function()
-        for _, child in pairs(ContentContainer:GetChildren()) do if child:IsA("ScrollingFrame") then child.Visible = false child.GroupTransparency = 1 end end
-        for _, child in pairs(TabContainer:GetChildren()) do if child:IsA("TextButton") then child.TextColor3 = Color3.fromRGB(200,200,200) child.BackgroundTransparency = 1 end end
-        
-        Scroll.Visible = true
-        Scroll.GroupTransparency = 1
-        TweenService:Create(Scroll, TweenInfo.new(0.3), {GroupTransparency = 0}):Play()
-        
-        TabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        TabBtn.BackgroundTransparency = 0.5
-        TabBtn.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
+    local lbl = Instance.new("TextLabel", frame)
+    lbl.Size = UDim2.new(1, -50, 1, 0)
+    lbl.Position = UDim2.new(0, 10, 0, 0)
+    lbl.BackgroundTransparency = 1
+    lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+    lbl.Font = Enum.Font.Gotham
+    lbl.TextSize = 13
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Text = title
+    
+    local btn = Instance.new("TextButton", frame)
+    btn.Size = UDim2.new(0, 40, 0, 20)
+    btn.Position = UDim2.new(1, -50, 0.5, -10)
+    btn.BackgroundColor3 = instanceVal.Value and Color3.fromRGB(0, 170, 127) or Color3.fromRGB(80, 80, 80)
+    btn.Text = ""
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(1, 0)
+    
+    local circle = Instance.new("Frame", btn)
+    circle.Size = UDim2.new(0, 16, 0, 16)
+    circle.Position = instanceVal.Value and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
+    circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Instance.new("UICorner", circle).CornerRadius = UDim.new(1, 0)
+    
+    btn.MouseButton1Click:Connect(function()
+        instanceVal.Value = not instanceVal.Value
+        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = instanceVal.Value and Color3.fromRGB(0, 170, 127) or Color3.fromRGB(80, 80, 80)}):Play()
+        TweenService:Create(circle, TweenInfo.new(0.2), {Position = instanceVal.Value and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)}):Play()
+        if func then func(FeatureLoadout, instanceVal.Value) end
     end)
-    
-    if currentTab == nil then
-        Scroll.Visible = true
-        Scroll.GroupTransparency = 0
-        TabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        TabBtn.BackgroundTransparency = 0.5
-        TabBtn.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
-        currentTab = tabKey
-    end
-    
-    TabContainer.CanvasSize = UDim2.new(0, 0, 0, TabListLayout.AbsoluteContentSize.Y)
-    return Scroll
 end
 
-local function AutoCanvas(scroll) scroll.CanvasSize = UDim2.new(0, 0, 0, scroll.UIListLayout.AbsoluteContentSize.Y + 20) end
-
-function updateControlsLocalization()
-    for _, scroll in pairs(ContentContainer:GetChildren()) do
-        if scroll:IsA("ScrollingFrame") then
-            for _, control in pairs(scroll:GetChildren()) do
-                if control:IsA("Frame") then
-                    local titleText = control:FindFirstChild("Title")
-                    if titleText and control:GetAttribute("LocalizationKey") then
-                        titleText.Text = getTranslation(control:GetAttribute("LocalizationKey") .. "_title")
-                    end
-                end
+local function CreateSlider(parent, title, instanceVal, min, max, func)
+    local frame = Instance.new("Frame", parent)
+    frame.Size = UDim2.new(1, -20, 0, 50)
+    frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    frame.BackgroundTransparency = 0.9
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 6)
+    
+    local lbl = Instance.new("TextLabel", frame)
+    lbl.Size = UDim2.new(1, -20, 0, 20)
+    lbl.Position = UDim2.new(0, 10, 0, 5)
+    lbl.BackgroundTransparency = 1
+    lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+    lbl.Font = Enum.Font.Gotham
+    lbl.TextSize = 13
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Text = title .. " : " .. tostring(instanceVal.Value)
+    
+    local sliderBg = Instance.new("Frame", frame)
+    sliderBg.Size = UDim2.new(1, -20, 0, 6)
+    sliderBg.Position = UDim2.new(0, 10, 0, 35)
+    sliderBg.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+    Instance.new("UICorner", sliderBg).CornerRadius = UDim.new(1, 0)
+    
+    local sliderFill = Instance.new("Frame", sliderBg)
+    local percent = (instanceVal.Value - min) / (max - min)
+    sliderFill.Size = UDim2.new(percent, 0, 1, 0)
+    sliderFill.BackgroundColor3 = Color3.fromRGB(0, 170, 127)
+    Instance.new("UICorner", sliderFill).CornerRadius = UDim.new(1, 0)
+    
+    local btn = Instance.new("TextButton", sliderBg)
+    btn.Size = UDim2.new(1, 0, 1, 0)
+    btn.BackgroundTransparency = 1
+    btn.Text = ""
+    
+    local dragging = false
+    btn.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true end
+    end)
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local mousePos = UserInputService:GetMouseLocation().X
+            local rel = math.clamp((mousePos - sliderBg.AbsolutePosition.X) / sliderBg.AbsoluteSize.X, 0, 1)
+            sliderFill.Size = UDim2.new(rel, 0, 1, 0)
+            local val = math.floor(min + (max - min) * rel)
+            instanceVal.Value = val
+            lbl.Text = title .. " : " .. tostring(val)
+            if title:lower():find("fov") or title:lower():find("pov") then
+                workspace.CurrentCamera.FieldOfView = val
             end
-        end
-    end
-end
-
-local function CreateToggle(parent, featureKey, valueObj, descText)
-    local titleText = getTranslation(featureKey .. "_title")
-    local Frame = Instance.new("Frame", parent)
-    Frame.Name = featureKey
-    Frame.Size = UDim2.new(0.95, 0, 0, 45)
-    Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    Frame.BackgroundTransparency = 0.2 -- Sedikit transparan agar readable
-    Frame:SetAttribute("LocalizationKey", featureKey)
-    Frame.ZIndex = 4
-    Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 6)
-    Instance.new("UIStroke", Frame).Color = Color3.fromRGB(80,80,80)
-
-    local Title = Instance.new("TextLabel", Frame)
-    Title.Name = "Title"
-    Title.Size = UDim2.new(0.7, 0, 0.5, 0)
-    Title.Position = UDim2.new(0, 10, 0, 5)
-    Title.BackgroundTransparency = 1
-    Title.Text = titleText
-    Title.TextColor3 = Color3.fromRGB(230, 230, 230)
-    Title.Font = Enum.Font.GothamBold
-    Title.TextSize = 13
-    Title.TextXAlignment = Enum.TextXAlignment.Left
-    Title.ZIndex = 5
-
-    local Desc = Instance.new("TextLabel", Frame)
-    Desc.Size = UDim2.new(0.7, 0, 0.5, 0)
-    Desc.Position = UDim2.new(0, 10, 0.5, -2)
-    Desc.BackgroundTransparency = 1
-    Desc.Text = descText or ""
-    Desc.TextColor3 = Color3.fromRGB(180, 180, 180)
-    Desc.Font = Enum.Font.Gotham
-    Desc.TextSize = 10
-    Desc.TextXAlignment = Enum.TextXAlignment.Left
-    Desc.TextTruncate = Enum.TextTruncate.AtEnd
-    Desc.ZIndex = 5
-
-    local Btn = Instance.new("TextButton", Frame)
-    Btn.Size = UDim2.new(0, 50, 0, 24)
-    Btn.Position = UDim2.new(1, -60, 0.5, -12)
-    Btn.Text = valueObj.Value and "ON" or "OFF"
-    Btn.BackgroundColor3 = valueObj.Value and Color3.fromRGB(255, 105, 180) or Color3.fromRGB(70, 70, 70)
-    Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Btn.Font = Enum.Font.GothamBold
-    Btn.TextSize = 12
-    Btn.ZIndex = 5
-    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 4)
-
-    Btn.MouseButton1Click:Connect(function()
-        valueObj.Value = not valueObj.Value
-        for TabName, TabContents in pairs(FeatureLoadout) do
-            if TabContents[valueObj.Name] and TabContents[valueObj.Name].ScriptFunction then TabContents[valueObj.Name]:ScriptFunction(valueObj.Value) end
+            if func then func(FeatureLoadout, val) end
         end
     end)
-    valueObj.Changed:Connect(function()
-        Btn.Text = valueObj.Value and "ON" or "OFF"
-        Btn.BackgroundColor3 = valueObj.Value and Color3.fromRGB(255, 105, 180) or Color3.fromRGB(70, 70, 70)
-    end)
-    AutoCanvas(parent)
 end
 
-local function CreateCycle(parent, featureKey, valueObj, optionsString, descText)
-    local titleText = getTranslation(featureKey .. "_title")
-    local Frame = Instance.new("Frame", parent)
-    Frame.Name = featureKey
-    Frame.Size = UDim2.new(0.95, 0, 0, 45)
-    Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    Frame.BackgroundTransparency = 0.2
-    Frame:SetAttribute("LocalizationKey", featureKey)
-    Frame.ZIndex = 4
-    Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 6)
-    Instance.new("UIStroke", Frame).Color = Color3.fromRGB(80,80,80)
-
-    local Title = Instance.new("TextLabel", Frame)
-    Title.Name = "Title"
-    Title.Size = UDim2.new(0.4, 0, 0.5, 0)
-    Title.Position = UDim2.new(0, 10, 0, 5)
-    Title.BackgroundTransparency = 1
-    Title.Text = titleText
-    Title.TextColor3 = Color3.fromRGB(230, 230, 230)
-    Title.Font = Enum.Font.GothamBold
-    Title.TextSize = 13
-    Title.TextXAlignment = Enum.TextXAlignment.Left
-    Title.ZIndex = 5
+local function CreateDropdown(parent, title, instanceVal, optionsString, func)
+    local frame = Instance.new("Frame", parent)
+    frame.Size = UDim2.new(1, -20, 0, 35)
+    frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    frame.BackgroundTransparency = 0.9
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 6)
     
-    local Desc = Instance.new("TextLabel", Frame)
-    Desc.Size = UDim2.new(0.4, 0, 0.5, 0)
-    Desc.Position = UDim2.new(0, 10, 0.5, -2)
-    Desc.BackgroundTransparency = 1
-    Desc.Text = descText or ""
-    Desc.TextColor3 = Color3.fromRGB(180, 180, 180)
-    Desc.Font = Enum.Font.Gotham
-    Desc.TextSize = 10
-    Desc.TextXAlignment = Enum.TextXAlignment.Left
-    Desc.TextTruncate = Enum.TextTruncate.AtEnd
-    Desc.ZIndex = 5
-
-    local Btn = Instance.new("TextButton", Frame)
-    Btn.Size = UDim2.new(0, 110, 0, 24)
-    Btn.Position = UDim2.new(1, -120, 0.5, -12)
-    Btn.Text = getTranslation(valueObj.Value)
-    Btn.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
-    Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Btn.Font = Enum.Font.GothamBold
-    Btn.TextSize = 11
-    Btn.TextWrapped = true
-    Btn.ZIndex = 5
-    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 4)
-
-    local function getOpts()
-        local raw = valueObj:GetAttribute("Options") or optionsString or ""
-        return string.split(raw, "|")
-     end
-
-    Btn.MouseButton1Click:Connect(function()
-        local opts = getOpts()
-        if #opts == 0 or (#opts == 1 and opts[1] == "") then return end
-        local currentIdx = 1
-        for i, v in ipairs(opts) do if v == valueObj.Value then currentIdx = i break end end
-        local nextIdx = currentIdx + 1
-        if nextIdx > #opts then nextIdx = 1 end
-        valueObj.Value = opts[nextIdx]
-        Btn.Text = getTranslation(valueObj.Value)
-        for TabName, TabContents in pairs(FeatureLoadout) do
-            if TabContents[valueObj.Name] and TabContents[valueObj.Name].ScriptFunction then TabContents[valueObj.Name]:ScriptFunction(valueObj.Value) end
-        end
-     end)
-    valueObj.Changed:Connect(function() Btn.Text = getTranslation(valueObj.Value) end)
-    AutoCanvas(parent)
-end
-
-local function CreateSlider(parent, featureKey, valueObj, min, max, descText)
-    local titleText = getTranslation(featureKey .. "_title")
-    local Frame = Instance.new("Frame", parent)
-    Frame.Name = featureKey
-    Frame.Size = UDim2.new(0.95, 0, 0, 55)
-    Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    Frame.BackgroundTransparency = 0.2
-    Frame:SetAttribute("LocalizationKey", featureKey)
-    Frame.ZIndex = 4
-    Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 6)
-    Instance.new("UIStroke", Frame).Color = Color3.fromRGB(80,80,80)
-
-    local Title = Instance.new("TextLabel", Frame)
-    Title.Name = "Title"
-    Title.Size = UDim2.new(0.7, 0, 0.4, 0)
-    Title.Position = UDim2.new(0, 10, 0, 5)
-    Title.BackgroundTransparency = 1
-    Title.Text = titleText
-    Title.TextColor3 = Color3.fromRGB(230, 230, 230)
-    Title.Font = Enum.Font.GothamBold
-    Title.TextSize = 13
-    Title.TextXAlignment = Enum.TextXAlignment.Left
-    Title.ZIndex = 5
+    local lbl = Instance.new("TextLabel", frame)
+    lbl.Size = UDim2.new(1, -100, 1, 0)
+    lbl.Position = UDim2.new(0, 10, 0, 0)
+    lbl.BackgroundTransparency = 1
+    lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+    lbl.Font = Enum.Font.Gotham
+    lbl.TextSize = 13
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Text = title .. " : " .. tostring(instanceVal.Value)
     
-    local Desc = Instance.new("TextLabel", Frame)
-    Desc.Size = UDim2.new(0.7, 0, 0.4, 0)
-    Desc.Position = UDim2.new(0, 10, 0.4, 2)
-    Desc.BackgroundTransparency = 1
-    Desc.Text = descText or ""
-    Desc.TextColor3 = Color3.fromRGB(180, 180, 180)
-    Desc.Font = Enum.Font.Gotham
-    Desc.TextSize = 10
-    Desc.TextXAlignment = Enum.TextXAlignment.Left
-    Desc.TextTruncate = Enum.TextTruncate.AtEnd
-    Desc.ZIndex = 5
+    local dropBtn = Instance.new("TextButton", frame)
+    dropBtn.Size = UDim2.new(0, 80, 0, 25)
+    dropBtn.Position = UDim2.new(1, -90, 0.5, -12.5)
+    dropBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    dropBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    dropBtn.Text = "Select ▼"
+    Instance.new("UICorner", dropBtn).CornerRadius = UDim.new(0, 4)
+
+    local listFrame = Instance.new("ScrollingFrame", parent)
+    listFrame.Size = UDim2.new(1, -20, 0, 100)
+    listFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    listFrame.BackgroundTransparency = 0.5
+    listFrame.Visible = false
+    listFrame.ScrollBarThickness = 2
+    Instance.new("UICorner", listFrame).CornerRadius = UDim.new(0, 6)
     
-    local ValText = Instance.new("TextLabel", Frame)
-    ValText.Size = UDim2.new(0.2, 0, 0.4, 0)
-    ValText.Position = UDim2.new(0.8, -10, 0, 5)
-    ValText.BackgroundTransparency = 1
-    ValText.Text = tostring(valueObj.Value)
-    ValText.TextColor3 = Color3.fromRGB(255, 105, 180)
-    ValText.Font = Enum.Font.GothamBold
-    ValText.TextSize = 13
-    ValText.TextXAlignment = Enum.TextXAlignment.Right
-    ValText.ZIndex = 5
-
-    local SliderBar = Instance.new("TextButton", Frame)
-    SliderBar.Size = UDim2.new(1, -20, 0, 8)
-    SliderBar.Position = UDim2.new(0, 10, 0.75, 0)
-    SliderBar.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-    SliderBar.Text = ""
-    SliderBar.AutoButtonColor = false
-    SliderBar.ZIndex = 5
-    Instance.new("UICorner", SliderBar).CornerRadius = UDim.new(1, 0)
-
-    local Fill = Instance.new("Frame", SliderBar)
-    local range = max - min
-    if range == 0 then range = 1 end
-    Fill.Size = UDim2.new(math.clamp((valueObj.Value - min)/range, 0, 1), 0, 1, 0)
-    Fill.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
-    Fill.ZIndex = 6
-    Instance.new("UICorner", Fill).CornerRadius = UDim.new(1, 0)
-
-    local isDragging = false
-    local function updateSlider(input)
-        local rel = math.clamp((input.Position.X - SliderBar.AbsolutePosition.X) / SliderBar.AbsoluteSize.X, 0, 1)
-        local newVal = math.floor(min + (rel * (max - min)))
-        valueObj.Value = newVal
-        for TabName, TabContents in pairs(FeatureLoadout) do
-             if TabContents[valueObj.Name] and TabContents[valueObj.Name].ScriptFunction then TabContents[valueObj.Name]:ScriptFunction(valueObj.Value) end
-        end
+    Instance.new("UIListLayout", listFrame).SortOrder = Enum.SortOrder.LayoutOrder
+    
+    local options = string.split(optionsString, "|")
+    for _, opt in ipairs(options) do
+        local optBtn = Instance.new("TextButton", listFrame)
+        optBtn.Size = UDim2.new(1, 0, 0, 25)
+        optBtn.BackgroundTransparency = 1
+        optBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+        optBtn.Text = opt
+        optBtn.Font = Enum.Font.Gotham
+        optBtn.MouseButton1Click:Connect(function()
+            instanceVal.Value = opt
+            lbl.Text = title .. " : " .. tostring(opt)
+            listFrame.Visible = false
+            if func then func(FeatureLoadout, opt) end
+        end)
     end
-    SliderBar.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then isDragging = true updateSlider(input) end end)
-    UserInputService.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then isDragging = false end end)
-    UserInputService.InputChanged:Connect(function(input) if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then updateSlider(input) end end)
-    valueObj.Changed:Connect(function() ValText.Text = tostring(valueObj.Value) local r = max - min if r == 0 then r = 1 end Fill.Size = UDim2.new(math.clamp((valueObj.Value - min)/r, 0, 1), 0, 1, 0) end)
-     AutoCanvas(parent)
+    
+    dropBtn.MouseButton1Click:Connect(function() listFrame.Visible = not listFrame.Visible end)
 end
 
--- Initialize UI Tabs --
-task.wait(0.5)
+-- Link Data to Custom UI
+PlusFolderSettings.Name = "Plus"
+PlusFolderSettings.Parent = PlayerData
 
-local sortedTabs = {}
 for TabName, TabContents in pairs(FeatureLoadout) do
-    table.insert(sortedTabs, {name = TabName, order = TabContents.TabAttributes and TabContents.TabAttributes.LayoutOrder or 99})
-end
-table.sort(sortedTabs, function(a,b) return a.order < b.order end)
-
-for _, tabInfo in ipairs(sortedTabs) do
-    local TabName = tabInfo.name
-    local TabContents = FeatureLoadout[TabName]
-    local scroll = CreateTab(TabName)
+    if TabName == "ExploitFunctions" or TabName == "Outdated" or TabName == "Unofficial" then continue end
     
-    local sortedFeatures = {}
-    for SettingName, SettingData in pairs(TabContents) do
-        if SettingName ~= "TabAttributes" then table.insert(sortedFeatures, {name = SettingName, data = SettingData}) end
+    local targetTab
+    if TabName == "Automation" then targetTab = TabAuto
+    elseif TabName == "Features" then targetTab = TabFeat
+    elseif TabName == "Visuals" then targetTab = TabVis
+    elseif TabName == "Miscellaneous" then targetTab = TabMisc
     end
-    table.sort(sortedFeatures, function(a,b) return (a.data.LayoutOrder or 99) < (b.data.LayoutOrder or 99) end)
-    
-    for _, feature in ipairs(sortedFeatures) do
-        local fName = feature.name
-        local fData = feature.data
-        local valObj = PlusFolderSettings:FindFirstChild(fName, true)
+
+    local Folder = Instance.new("Folder", PlusFolderSettings)
+    Folder.Name = TabName
+
+    for SettingName, SettingData in pairs(TabContents) do
+        if type(SettingData) ~= "table" or SettingName == "TabAttributes" then continue end
         
-         if valObj then
-            local desc = valObj:GetAttribute("DisplayDescription") or ""
-            if fData.InstanceType == "BoolValue" then CreateToggle(scroll, fName, valObj, desc)
-            elseif fData.InstanceType == "StringValue" then
-                local opts = fData.ExtraData and fData.ExtraData.Options or ""
-                CreateCycle(scroll, fName, valObj, opts, desc)
-            elseif fData.InstanceType == "NumberValue" then
-                local min = fData.ExtraData and fData.ExtraData.MinValue or 0
-                local max = fData.ExtraData and fData.ExtraData.MaxValue or 100
-                CreateSlider(scroll, fName, valObj, min, max, desc)
+        local NewInstance = Instance.new(SettingData.InstanceType)
+        NewInstance.Name = SettingName
+        NewInstance.Value = TableData[SettingName] ~= nil and TableData[SettingName] or SettingData.DefaultInstanceValue
+        NewInstance.Parent = Folder
+        FeatureLoadout[TabName][SettingName]["Instance"] = NewInstance
+
+        NewInstance:GetPropertyChangedSignal("Value"):Connect(function()
+            if SettingData.Savable then
+                TableData[SettingName] = NewInstance.Value
+                ChangeData("Data.txt", HttpService:JSONEncode(TableData), true)
+            end
+            if SettingData.ScriptFunction then SettingData.ScriptFunction(FeatureLoadout[TabName][SettingName], NewInstance.Value) end
+        end)
+
+        if targetTab then
+            local cleanTitle = SettingData.DisplayTitle:gsub("<[^>]+>", "")
+            if SettingData.InstanceType == "BoolValue" then
+                CreateToggle(targetTab, cleanTitle, NewInstance, SettingData.ScriptFunction)
+            elseif SettingData.InstanceType == "NumberValue" then
+                local min = SettingData.ExtraData and SettingData.ExtraData.MinValue or 0
+                local max = SettingData.ExtraData and SettingData.ExtraData.MaxValue or 100
+                CreateSlider(targetTab, cleanTitle, NewInstance, min, max, SettingData.ScriptFunction)
+            elseif SettingData.InstanceType == "StringValue" and SettingData.ExtraData and SettingData.ExtraData.Options then
+                CreateDropdown(targetTab, cleanTitle, NewInstance, SettingData.ExtraData.Options, SettingData.ScriptFunction)
             end
         end
     end
 end
 
-function updateInformationTab()
-    local infoScroll = ContentContainer:FindFirstChild("Information")
-    if not infoScroll then return end
-    infoScroll:ClearAllChildren()
-    local InfoLayout = Instance.new("UIListLayout", infoScroll)
-    InfoLayout.Padding = UDim.new(0, 8)
-    InfoLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-    local Padding = Instance.new("UIPadding", infoScroll)
-    Padding.PaddingTop = UDim.new(0, 10)
-    Padding.PaddingBottom = UDim.new(0, 10)
+SwitchTab(Tabs["Automation"].Scroll)
 
-    local function createInfoText(langKey, color)
-        local frame = Instance.new("Frame", infoScroll)
-        frame.Size = UDim2.new(0.95, 0, 0, 35)
-        frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-        frame.BackgroundTransparency = 0.2
-        frame.ZIndex = 4
-        Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 6)
-        Instance.new("UIStroke", frame).Color = Color3.fromRGB(80,80,80)
-
-        local label = Instance.new("TextLabel", frame)
-        label.Size = UDim2.new(1, -20, 1, 0)
-        label.Position = UDim2.new(0, 10, 0, 0)
-        label.BackgroundTransparency = 1
-        label.Text = getTranslation(langKey)
-        label.TextColor3 = color or Color3.fromRGB(230, 230, 230)
-        label.Font = Enum.Font.GothamBold
-        label.TextSize = 14
-        label.TextXAlignment = Enum.TextXAlignment.Left
-        label.ZIndex = 5
+RunService.RenderStepped:Connect(function()
+    if FeatureLoadout and FeatureLoadout["Miscellaneous"] and FeatureLoadout["Miscellaneous"]["ExtendedFOV"] and FeatureLoadout["Miscellaneous"]["ExtendedFOV"]["Instance"] then
+        local fovValue = FeatureLoadout["Miscellaneous"]["ExtendedFOV"]["Instance"].Value
+        if workspace.CurrentCamera.FieldOfView ~= fovValue then
+            workspace.CurrentCamera.FieldOfView = fovValue
+        end
     end
-
-    createInfoText("dev_info", Color3.fromRGB(255, 105, 180))
-    createInfoText("tele_info")
-    createInfoText("tiktok_info")
-    createInfoText("status_info", Color3.fromRGB(0, 255, 0))
-    
-    AutoCanvas(infoScroll)
-end
-
-function updateLocalization()
-    MainFrame.TitleBar.TitleText.Text = "Pradaxca Plus - Pink Edition"
-    updateTabsLocalization()
-    updateControlsLocalization()
-    updateInformationTab()
-end
-
--- Apply saved Language on startup --
-local savedLang = GetValue("Language") or "EN"
-currentLang = savedLang
-updateLocalization()
-
-task.spawn(function()
-    task.wait(1.5)
-    StarterGui:SetCore("SendNotification", { Title = "Pradaxca Plus", Text = getTranslation("start_notif"), Duration = 5 })
 end)
 
-ColoredPrint("Pradaxca Plus - Full Active Edition loaded successfully!","success",Color3.fromRGB(255, 105, 180))
+ColoredPrint("Forsaken plus (Pradaxca UI) has loaded successfully","success",Color3.fromRGB(0, 200, 125))
